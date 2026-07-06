@@ -1,0 +1,62 @@
+# JLC Flux2 ControlNet — local/generated material
+
+# Python caches and test artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local investigation, reference, test, and milestone storage
+.bak/
+.reference/
+.tools/
+.tests/
+
+# Generated project reports
+jlc-flux2-controlnet-structure.txt
+*-structure.txt
+
+# Archives and temporary backups
+*.zip
+*.7z
+*.rar
+*.bak
+*.tmp
+*.temp
+*.orig
+*~
+
+# Model weights and other large binary assets
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.gguf
+*.onnx
+*.engine
+
+# Runtime output and logs
+output/
+outputs/
+temp/
+tmp/
+*.log
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.vs/
+*.code-workspace
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python environments
+.venv/
+venv/
+env/

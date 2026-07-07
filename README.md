@@ -376,7 +376,6 @@ JLC-Flux2-ControlNet/
 │   └── jlc_flux2_controlnet_orchestrator_node.py
 ├── workflows/
 ├── THIRD_PARTY_NOTES.md
-├── VALIDATION_NOTES.txt
 └── __init__.py
 ```
 

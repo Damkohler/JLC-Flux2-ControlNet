@@ -14,15 +14,17 @@
 The project provides:
 
 - A working single-ControlNet Apply path.
-- A two-branch **JLC Flux2 ControlNet Orchestrator**.
+- A fixed-maximum **four-branch JLC Flux2 ControlNet Orchestrator**.
 - Flat, non-recursive multi-ControlNet composition.
-- One shared ControlNet checkpoint/model across orchestrator branches.
-- Independent control image, strength, and timestep range for each branch.
+- One shared ControlNet checkpoint/model across all orchestrator branches.
+- Independent control image, strength, and timestep range for every branch.
+- Legacy single-conditioning nodes and Advanced positive/negative conditioning variants.
+- FLUX.2 reference-latent compatibility.
 - Exact zero-strength bypass.
 - ComfyUI-native model loading, offloading, hooks, and cleanup.
 - DynamicVRAM-compatible lazy checkpoint materialization.
 
-The current release is intentionally focused on **control-image conditioning for FLUX.2-dev**. Reference-latent and inpainting inputs are not yet implemented.
+The current milestone supports **RGB control-image conditioning and FLUX.2 reference latents**. Inpainting image and mask conditioning remain future work.
 
 ---
 
@@ -30,15 +32,17 @@ The current release is intentionally focused on **control-image conditioning for
 
 The included showcase workflows demonstrate both validated entry points into the toolchain.
 
-The **ControlNet Apply** workflow shows the direct single-ControlNet path: one control image, one strength, and one timestep range attached to the conditioning. The **ControlNet Orchestrator** workflow demonstrates non-recursive composition: two independently configured control branches share one compact FLUX.2 ControlNet model, execute separately against the same sampler state, and have their residuals combined additively before injection.
+The **ControlNet Apply** workflow shows the direct single-ControlNet path: one control image, one strength, and one timestep range attached to the conditioning. The original **ControlNet Orchestrator** showcase demonstrates the two-branch form of the same non-recursive composition architecture. The current node now accepts up to four independently configured branches while preserving that validated execution model.
 
 Together, the workflows demonstrate:
 
 - A shared compact FLUX.2 ControlNet model.
 - Independent control images, strengths, and timestep ranges.
-- Non-recursive two-branch residual composition through the Orchestrator.
+- Flat non-recursive residual composition through the Orchestrator.
 - Native FLUX.2 sampling through ComfyUI.
 - DynamicVRAM-compatible model loading and offloading.
+
+The four-branch, dual-conditioning, and reference-latent capabilities described below have also been runtime validated. Updated showcase workflows will be added separately.
 
 ### JLC Flux2 ControlNet Apply
 
@@ -71,19 +75,23 @@ The present milestone includes:
 | Capability | Status |
 |---|---:|
 | Single FLUX.2 ControlNet Apply | Working |
-| Two-branch ControlNet Orchestrator | Working |
+| Four-branch fixed-maximum ControlNet Orchestrator | Working |
 | Shared ControlNet checkpoint/model | Working |
 | Independent branch images | Working |
 | Independent branch strengths | Working |
 | Independent branch start/end ranges | Working |
 | Flat non-recursive composition | Working |
+| Positive/negative Advanced Apply | Working |
+| Positive/negative Advanced Orchestrator | Working |
+| FLUX.2 reference latents | Working |
+| Reference + four ControlNet branches | Working |
 | Exact strength-zero bypass | Working |
 | DynamicVRAM lazy loading | Working |
-| Reference latents | Not implemented |
+| RGB preprocessing contract | Validated |
 | Inpaint image / mask conditioning | Not implemented |
 | Arbitrary dynamic branch count | Not implemented |
 
-This capability set is the project's first stable public freeze point.
+This capability set is the project's second major validated milestone and preserves the original single-control and two-branch freeze as regression baselines.
 
 ---
 
@@ -120,7 +128,7 @@ The loader uses a deferred checkpoint handle so that the large text encoder can 
 
 ### JLC Flux2 ControlNet Apply
 
-Applies one control image to conditioning with:
+Applies one control image to one conditioning stream with:
 
 - `strength`
 - `start_percent`
@@ -129,18 +137,26 @@ Applies one control image to conditioning with:
 
 The VAE is required because the control image is encoded into FLUX.2 latent space before side-branch execution.
 
+### JLC Flux2 ControlNet Apply Advanced
+
+Applies one configured ControlNet to separate positive and negative conditioning streams. When both streams share the same previous ControlNet state, the Advanced node reuses one configured JLC control object in the same spirit as ComfyUI's native advanced ControlNet ownership behavior.
+
 ### JLC Flux2 ControlNet Orchestrator
 
-Applies two independent control branches while sharing one loaded ControlNet model.
+Applies two required control branches and up to two additional optional branches while sharing one loaded ControlNet model.
 
-Each branch has its own:
+Each configured branch has its own:
 
 - control image
 - strength
 - start percentage
 - end percentage
 
-The orchestrator does **not** create a recursive `previous_controlnet` execution chain. Both branches are evaluated independently, and their residuals are merged before injection into the native FLUX.2 blocks.
+The orchestrator does **not** create a recursive `previous_controlnet` execution chain. All branches are evaluated independently and sequentially, and their residuals are merged before injection into the native FLUX.2 blocks.
+
+### JLC Flux2 ControlNet Orchestrator Advanced
+
+Provides the same two-to-four-branch flat composition with explicit positive and negative conditioning inputs and outputs. One composed control object is attached to both conditioning streams, while all child controls remain detached from recursive chaining.
 
 ---
 
@@ -179,9 +195,10 @@ For each active control branch:
    - 128 control-latent channels
    - 4 zero mask channels
    - 128 zero masked-image-latent channels
-3. The compact four-block side model executes once per denoising forward.
-4. Four residual tensors are produced.
-5. Residuals are injected after native FLUX.2 double blocks:
+3. When FLUX.2 reference latents are present, an exact-zero 260-channel suffix is appended for every reference token so the control context matches the native target-plus-reference token sequence.
+4. The compact four-block side model executes once per denoising forward across the complete native image-token sequence.
+5. Four residual tensors are produced.
+6. Residuals are injected after native FLUX.2 double blocks:
 
 ```text
 0, 2, 4, 6
@@ -196,13 +213,44 @@ For multiple controls, the orchestrator evaluates each branch independently agai
 Conceptually:
 
 ```text
-combined_residual = strength_A * residual_A
-                  + strength_B * residual_B
+combined_residual = strength_1 * residual_1
+                  + strength_2 * residual_2
+                  + ...
+                  + strength_N * residual_N
 ```
 
-The controls do not feed into one another.
+The controls do not feed into one another. The first owned residual is cloned once, and later residuals are accumulated in place with weighted addition.
 
-As a composition check, two identical branches at strengths `0.5 + 0.5` produced a pixel-exact match to one branch at strength `1.0` in the validation workflow.
+As a composition check, two identical branches at strengths `0.5 + 0.5` produced a pixel-exact match to one branch at strength `1.0` in the validation workflow. The same ownership and accumulation rule is used for three and four branches.
+
+### Reference-latent compatibility
+
+FLUX.2 reference images are encoded by the native reference-latent workflow before the JLC Apply or Orchestrator node. Native FLUX.2 appends those reference tokens after the target image-token prefix.
+
+JLC mirrors the reference ControlNet contract by appending exact-zero 260-channel control tokens for the reference suffix. The compact side model then processes target and reference tokens together, while the native FLUX.2 path ultimately returns only the denoised target prefix.
+
+This preserves:
+
+- target ControlNet influence;
+- native reference-image palette, appearance, and style influence;
+- full-sequence tensor alignment;
+- non-recursive multi-ControlNet composition;
+- native segmented modulation, including `index_timestep_zero`.
+
+### Preprocessing contract
+
+The validated RGB path uses:
+
+- RGB channel order;
+- `[0,1]` image input;
+- `[-1,1]` VAE normalization;
+- FLUX.2 VAE patchification and running-stat latent normalization;
+- 128 control-latent channels;
+- 4 zero mask channels;
+- 128 zero masked-image-latent channels;
+- final 260-channel packing.
+
+Same-size and mismatched-aspect-ratio control images have both been runtime validated without tensor misalignment. The current ComfyUI resize behavior remains part of the frozen working baseline.
 
 ---
 
@@ -250,12 +298,10 @@ No separate Python package installation is currently required beyond the depende
 
 1. Load a FLUX.2 diffusion model, text encoder, and VAE.
 2. Add **JLC Flux2 ControlNet Loader** and select the compact checkpoint.
-3. Add **JLC Flux2 ControlNet Apply**.
-4. Connect:
-   - positive conditioning
-   - ControlNet output
-   - FLUX.2 VAE
-   - control image
+3. Add:
+   - **JLC Flux2 ControlNet Apply** for one conditioning stream; or
+   - **JLC Flux2 ControlNet Apply Advanced** for separate positive and negative conditioning.
+4. Connect the conditioning, ControlNet output, FLUX.2 VAE, and control image.
 5. Start with:
 
 ```text
@@ -264,24 +310,35 @@ start_percent: 0.0
 end_percent:   1.0
 ```
 
-6. Send the resulting conditioning to the guider used by the FLUX.2 sampling workflow.
+6. Send the resulting conditioning, or positive and negative outputs, to the guider used by the FLUX.2 sampling workflow.
 7. Use FLUX.2-native latent and scheduling nodes, such as `EmptyFlux2LatentImage` and `Flux2Scheduler`.
 
 The project does not perform pose, edge, depth, or other preprocessing itself. Connect the output of the desired image preprocessor to the control-image input.
 
 ---
 
-## Quick Start: Two-Control Orchestrator
+## Quick Start: Two-to-Four-Control Orchestrator
 
 1. Load the ControlNet checkpoint once.
-2. Connect the loader output to **JLC Flux2 ControlNet Orchestrator**.
-3. Connect one VAE and up to two control images.
-4. Configure each branch independently.
-5. Send the orchestrator's conditioning output to the FLUX.2 guider.
+2. Connect the loader output to **JLC Flux2 ControlNet Orchestrator** or **Orchestrator Advanced**.
+3. Connect one VAE and the two required control images.
+4. Optionally connect control images 3 and 4.
+5. Configure each branch independently.
+6. Send the resulting conditioning output or positive/negative outputs to the FLUX.2 guider.
 
-A branch with strength `0` is an exact bypass and should not execute the side model for that branch.
+A branch with strength `0` is an exact bypass and should not encode its control image or execute the side model for that branch.
 
-Because both branches share one ControlNet model, the checkpoint is not duplicated merely because two controls are active.
+All configured branches share one ControlNet model; the checkpoint is not duplicated merely because several controls are active.
+
+## Quick Start: Reference Image + ControlNet
+
+1. Build the native FLUX.2 reference-latent conditioning path.
+2. Apply the reference-latent conditioning before the JLC node.
+3. Connect the resulting positive and negative conditioning to **JLC Flux2 ControlNet Apply Advanced** or **Orchestrator Advanced**.
+4. Begin with one reference image, one active ControlNet branch, and a moderate output resolution.
+5. Increase branch count and resolution separately after the basic compatibility run succeeds.
+
+Reference tokens enlarge the image sequence processed by every active side branch. Four controls plus a full-resolution reference image can therefore be dramatically slower than an otherwise identical control-only workflow.
 
 ---
 
@@ -297,23 +354,32 @@ Instead, it integrates the model with ComfyUI's loading system so that:
 - zero-strength controls do not needlessly execute the side branch;
 - cleanup remains part of the normal ControlNet lifecycle.
 
-A 16 GB RTX 4090 Laptop GPU was sufficient for the validated development workflows when used with ComfyUI's dynamic model loading. Larger resolutions and heavier model combinations may require substantial offloading and will be slower.
+A 16 GB RTX 4090 Laptop GPU was sufficient for the validated development workflows when used with ComfyUI's dynamic model loading. The system successfully completed a 1024 × 1536 stress test with four ControlNet branches and one equally token-dense reference image, but the run required heavy offloading and more than one hour for eight sampling steps.
+
+This should be treated as a compatibility proof, not a recommended operating point. Reference tokens increase the sequence processed by every active ControlNet branch, so resolution, reference-image size, and branch count should be scaled conservatively on 16 GB hardware.
 
 ---
 
 ## Validation
 
-The initial release was validated with:
+The current milestone was validated with:
 
 - coherent single-ControlNet image generation;
 - visible pose and structure transfer from the control image;
 - independent strength changes;
 - independent timestep ranges;
 - exact zero-strength bypass;
-- two active non-recursive branches;
-- one shared compact side model;
+- two, three, and four active non-recursive branches;
+- one shared compact side model and `CoreModelPatcher`;
 - pixel-exact `0.5 + 0.5 = 1.0` composition testing;
-- successful DynamicVRAM partial staging;
+- successful four-branch composition at 1024 × 1536;
+- same-aspect and mismatched-aspect control-image handling;
+- explicit positive and negative conditioning nodes;
+- one FLUX.2 reference latent combined with four active ControlNet branches;
+- visible reference influence on palette and style while ControlNet retained pose control;
+- successful target-plus-reference token expansion from 6,144 to 12,288 image tokens;
+- full-length residual generation and injection at blocks `0, 2, 4, 6`;
+- successful DynamicVRAM partial staging and offloading;
 - repeated sampling without global FLUX.2 monkey-patching.
 
 Development baseline:
@@ -335,12 +401,14 @@ Compatibility with later ComfyUI versions should be tested as ComfyUI's FLUX.2 i
 When diagnostics are enabled, the console can report:
 
 - wrapper activation;
-- control latent and context shapes;
+- control latent and target control-context shapes;
+- expanded runtime control-context shape;
+- target and reference token counts;
 - compact side-model execution;
 - residual tensor shapes and norms;
 - target injection blocks;
-- branch strengths;
-- non-recursive composition behavior;
+- active branch strengths and ranges;
+- flat non-recursive composition behavior;
 - lazy checkpoint materialization.
 
 Diagnostics are intended for validation and troubleshooting. They can be disabled for routine use.
@@ -349,11 +417,11 @@ Diagnostics are intended for validation and troubleshooting. They can be disable
 
 ## Current Limitations
 
-- FLUX.2 control-image mode only.
+- RGB control-image mode only.
 - Designed and validated around the FLUX.2-dev compact Union checkpoint listed above.
-- No reference-latent conditioning.
 - No inpainting image or mask path.
-- Orchestrator currently exposes two control branches rather than a dynamic arbitrary-count interface.
+- Reference-latent compatibility is validated, but high-resolution multi-branch reference workflows can be extremely expensive.
+- The Orchestrator exposes a fixed maximum of four controls rather than a dynamic arbitrary-count interface.
 - Single-GPU execution is the validated target.
 - This is an experimental integration and not an official Black Forest Labs or ComfyUI project.
 
@@ -423,4 +491,13 @@ Model weights are not included and remain subject to the licenses and terms of t
 
 ## Status
 
-The working single-ControlNet path and the two-branch non-recursive Orchestrator are frozen as the first public milestone. Further development should preserve these validated paths while adding new capabilities incrementally.
+The project has reached a major second milestone:
+
+- the original single-ControlNet path remains frozen;
+- the original two-branch pixel-exact composition remains the regression baseline;
+- the Orchestrator now supports up to four flat, non-recursive branches;
+- Advanced nodes provide explicit positive and negative conditioning;
+- FLUX.2 reference-latent compatibility is runtime validated;
+- four ControlNet branches and one reference image have completed successfully on a 16 GB RTX 4090 Laptop GPU.
+
+Further development should preserve all of these validated paths while adding inpainting/infill and broader model-family compatibility incrementally.

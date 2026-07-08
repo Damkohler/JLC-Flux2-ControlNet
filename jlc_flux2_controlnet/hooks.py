@@ -333,24 +333,9 @@ def flux2_injection_wrapper(
         if note is not None:
             note(x, context, ref_latents)
 
-    # Reference-image parity is intentionally deferred. Never apply a partial or
-    # ambiguous control path when reference latents are present.
-    if ref_latents is not None and len(ref_latents) > 0:
-        for owner in owners:
-            note = getattr(owner, "note_reference_skip", None)
-            if note is not None:
-                note()
-        return executor(
-            x,
-            timestep,
-            context,
-            y,
-            guidance,
-            ref_latents,
-            control,
-            transformer_options,
-            **kwargs,
-        )
+    # Native Flux.2 appends reference image tokens before entering the double
+    # blocks. Each JLC side branch expands its raw 260-channel context with the
+    # matching exact-zero suffix and returns full-sequence residuals.
 
     local_options = transformer_options.copy()
     patches_replace = comfy.patcher_extension.copy_nested_dicts(

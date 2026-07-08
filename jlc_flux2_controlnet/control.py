@@ -15,12 +15,99 @@ import comfy.utils
 
 from .constants import (
     CONTROL_LAYERS,
+    EXPECTED_CONTROL_INPUT_CHANNELS,
     EXPECTED_FLUX2_LATENT_CHANNELS,
     EXPECTED_MASK_CHANNELS,
     PROJECT_LOG_PREFIX,
     REQUESTS_KEY,
 )
 from .hooks import make_injection_hook_group
+
+
+
+def _expand_control_context_for_reference_tokens(
+    control_context: torch.Tensor,
+    image_tokens: torch.Tensor,
+) -> tuple[torch.Tensor, int]:
+    """Pad raw 260-channel control tokens across native Flux.2 references.
+
+    VideoX-Fun appends reference image tokens to the target image sequence and
+    appends an equal number of exact-zero control tokens before `control_img_in`.
+    The target-control prefix is therefore preserved exactly while references
+    participate in the compact side model with a neutral raw control input.
+    """
+    if control_context.ndim != 3 or image_tokens.ndim != 3:
+        raise RuntimeError(
+            "Flux2 reference compatibility expects rank-3 token tensors; "
+            f"control_context={tuple(control_context.shape)}, "
+            f"image_tokens={tuple(image_tokens.shape)}."
+        )
+    if control_context.shape[0] != image_tokens.shape[0]:
+        raise RuntimeError(
+            "Flux2 reference compatibility batch mismatch: "
+            f"control_context={tuple(control_context.shape)}, "
+            f"image_tokens={tuple(image_tokens.shape)}."
+        )
+    if control_context.shape[-1] != EXPECTED_CONTROL_INPUT_CHANNELS:
+        raise RuntimeError(
+            f"Expected {EXPECTED_CONTROL_INPUT_CHANNELS} raw control channels, "
+            f"got {control_context.shape[-1]}."
+        )
+
+    target_tokens = control_context.shape[1]
+    native_tokens = image_tokens.shape[1]
+    if target_tokens > native_tokens:
+        raise RuntimeError(
+            "Flux2 control context has more target tokens than the native "
+            f"target-plus-reference image sequence: control={target_tokens}, "
+            f"native={native_tokens}."
+        )
+
+    reference_tokens = native_tokens - target_tokens
+    if reference_tokens == 0:
+        return control_context, 0
+
+    reference_padding = torch.zeros(
+        (
+            control_context.shape[0],
+            reference_tokens,
+            control_context.shape[-1],
+        ),
+        device=control_context.device,
+        dtype=control_context.dtype,
+    )
+    return torch.cat((control_context, reference_padding), dim=1), reference_tokens
+
+
+def _reference_modulation_dims(
+    temb_mod_params_img,
+    *,
+    target_tokens: int,
+    native_tokens: int,
+) -> list[tuple[int, int, int]] | None:
+    """Mirror native Flux.2 segmented image modulation when it is active."""
+    img_mod_msa, _ = temb_mod_params_img
+    shift = img_mod_msa.shift
+    modulation_slots = shift.shape[1] if shift.ndim >= 3 else 1
+
+    if modulation_slots == 1:
+        return None
+
+    if modulation_slots != 2:
+        raise RuntimeError(
+            "Unsupported Flux2 image-modulation layout for reference latents: "
+            f"shape={tuple(shift.shape)}."
+        )
+    if native_tokens <= target_tokens:
+        raise RuntimeError(
+            "Flux2 supplied segmented reference modulation without reference "
+            f"tokens: target={target_tokens}, native={native_tokens}."
+        )
+
+    return [
+        (0, target_tokens, 0),
+        (target_tokens, native_tokens, 1),
+    ]
 
 
 class JLCFlux2Control(comfy.controlnet.ControlBase):
@@ -56,7 +143,7 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
         self.diagnostics_enabled = True
         self._diagnostic_wrapper_seen = False
         self._diagnostic_sidebranch_logged = False
-        self._diagnostic_ref_skip_logged = False
+        self._diagnostic_reference_logged = False
         self._diagnostic_injected_blocks: set[int] = set()
         self._diagnostic_injection_logged = False
         self._diagnostic_zero_bypass_logged = False
@@ -107,7 +194,7 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
         self.model_sampling_current = model.model_sampling
         self._diagnostic_wrapper_seen = False
         self._diagnostic_sidebranch_logged = False
-        self._diagnostic_ref_skip_logged = False
+        self._diagnostic_reference_logged = False
         self._diagnostic_injected_blocks.clear()
         self._diagnostic_injection_logged = False
         self._diagnostic_zero_bypass_logged = False
@@ -134,7 +221,7 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
         self.model_sampling_current = None
         self._diagnostic_wrapper_seen = False
         self._diagnostic_sidebranch_logged = False
-        self._diagnostic_ref_skip_logged = False
+        self._diagnostic_reference_logged = False
         self._diagnostic_injected_blocks.clear()
         self._diagnostic_injection_logged = False
         self._diagnostic_zero_bypass_logged = False
@@ -297,11 +384,28 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
                 "materialized through get_models() before side-branch execution."
             )
 
-        control_context = request["control_context"].to(
+        target_control_context = request["control_context"].to(
             device=img.device,
             dtype=img.dtype,
         )
+        target_tokens = target_control_context.shape[1]
+        control_context, reference_tokens = (
+            _expand_control_context_for_reference_tokens(
+                target_control_context,
+                img,
+            )
+        )
         temb_mod_params_img, temb_mod_params_txt = vec
+        modulation_dims_img = _reference_modulation_dims(
+            temb_mod_params_img,
+            target_tokens=target_tokens,
+            native_tokens=img.shape[1],
+        )
+
+        request["target_control_tokens"] = target_tokens
+        request["reference_tokens"] = reference_tokens
+        request["runtime_control_context_shape"] = tuple(control_context.shape)
+        request["modulation_dims_img"] = modulation_dims_img
 
         with torch.no_grad():
             residuals = self.control_model_wrapped.model.forward_control(
@@ -312,6 +416,7 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
                 temb_mod_params_txt=temb_mod_params_txt,
                 image_rotary_emb=pe,
                 attention_mask=attn_mask,
+                modulation_dims_img=modulation_dims_img,
             )
         return residuals
 
@@ -338,25 +443,28 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
             for residual in residuals
         ]
         logging.info(
-            "%s Side-branch execution confirmed: control_latent=%s, control_context=%s, img_tokens=%s, txt_tokens=%s, residuals=%s, norms=%s.",
+            "%s Side-branch execution confirmed: control_latent=%s, target_control_context=%s, runtime_control_context=%s, target_tokens=%s, reference_tokens=%s, img_tokens=%s, txt_tokens=%s, residuals=%s, norms=%s.",
             PROJECT_LOG_PREFIX,
             request.get("control_latent_shape"),
             tuple(request["control_context"].shape),
+            request.get("runtime_control_context_shape"),
+            request.get("target_control_tokens"),
+            request.get("reference_tokens", 0),
             tuple(img.shape),
             tuple(txt.shape),
             residual_shapes,
             residual_norms,
         )
-
-    def note_reference_skip(self):
-        if not self.diagnostics_enabled or self._diagnostic_ref_skip_logged:
-            return
-        self._diagnostic_ref_skip_logged = True
-        logging.warning(
-            "%s Control-image mode does not yet support reference latents; "
-            "skipping JLC control and preserving native output unchanged.",
-            PROJECT_LOG_PREFIX,
-        )
+        if (
+            request.get("reference_tokens", 0) > 0
+            and not self._diagnostic_reference_logged
+        ):
+            self._diagnostic_reference_logged = True
+            logging.info(
+                "%s Reference-latent compatibility active: appended %d exact-zero 260-channel control tokens; compact side-model residuals cover the full target-plus-reference image sequence.",
+                PROJECT_LOG_PREFIX,
+                request["reference_tokens"],
+            )
 
     def note_diagnostic_injection(self, *, block_index: int, strength: float, residual):
         if not self.diagnostics_enabled:

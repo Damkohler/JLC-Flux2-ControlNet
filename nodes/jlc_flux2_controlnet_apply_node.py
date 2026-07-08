@@ -147,3 +147,84 @@ class JLCFlux2ControlNetApplyDiagnostic:
             metadata_copy["control_apply_to_uncond"] = False
             output.append([tensor, metadata_copy])
         return (output,)
+class JLCFlux2ControlNetApplyAdvanced:
+    """Attach one shared ControlNet configuration to positive and negative."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "positive": ("CONDITIONING",),
+                "negative": ("CONDITIONING",),
+                "controlnet": ("JLC_FLUX2_CONTROLNET",),
+                "vae": ("VAE",),
+                "control_image": ("IMAGE",),
+                "strength": (
+                    "FLOAT",
+                    {"default": 0.75, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "diagnostics": ("BOOLEAN", {"default": True}),
+            }
+        }
+
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
+    RETURN_NAMES = ("positive", "negative")
+    FUNCTION = "apply_controlnet"
+    CATEGORY = "JLC/ControlNet/Flux2"
+
+    def apply_controlnet(
+        self,
+        positive,
+        negative,
+        controlnet,
+        vae,
+        control_image,
+        strength,
+        start_percent,
+        end_percent,
+        diagnostics,
+    ):
+        if start_percent > end_percent:
+            raise ValueError("start_percent must be less than or equal to end_percent")
+
+        hint_bchw = control_image.movedim(-1, 1)
+        configured_by_previous = {}
+        outputs = []
+
+        for conditioning in (positive, negative):
+            output = []
+            for tensor, metadata in conditioning:
+                metadata_copy = metadata.copy()
+                previous_control = metadata_copy.get("control")
+
+                # Match native ControlNetApplyAdvanced ownership: positive and
+                # negative entries with the same previous control share one
+                # configured ControlNet object and therefore one branch cache.
+                if previous_control not in configured_by_previous:
+                    control_copy = controlnet.copy().set_cond_hint(
+                        hint_bchw,
+                        strength=float(strength),
+                        timestep_percent_range=(
+                            float(start_percent),
+                            float(end_percent),
+                        ),
+                        vae=vae,
+                    )
+                    control_copy.diagnostics_enabled = bool(diagnostics)
+                    control_copy.set_previous_controlnet(previous_control)
+                    configured_by_previous[previous_control] = control_copy
+
+                metadata_copy["control"] = configured_by_previous[previous_control]
+                metadata_copy["control_apply_to_uncond"] = False
+                output.append([tensor, metadata_copy])
+            outputs.append(output)
+
+        return (outputs[0], outputs[1])

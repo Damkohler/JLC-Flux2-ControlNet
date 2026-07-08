@@ -2,84 +2,30 @@
 JLC Flux2 ControlNet Orchestrator
 ---------------------------------
 
-- JLC Flux2 ControlNet
-  - This node is part of the **JLC Flux2 ControlNet** package developed
-    by **J. L. Córdova**.
+Creates a fixed-maximum, non-recursive FLUX.2 ControlNet composition from one
+shared loaded side model.
 
-  - Repository
-    https://github.com/Damkohler/JLC-Flux2-ControlNet
+Slots 1 and 2 remain required for backward compatibility with the validated
+two-branch workflow. Slots 3 and 4 are optional. Every configured branch owns
+its own control hint, strength, timestep range, encoded-hint cache, and runtime
+state while sharing the same underlying side-model weights and CoreModelPatcher.
 
-- Node Purpose
-  - The **JLC Flux2 ControlNet Orchestrator** creates a two-branch,
-    non-recursive FLUX.2 ControlNet composition from one shared loaded
-    side model.
+All children are detached from `previous_controlnet` recursion and are evaluated
+sequentially by the existing flat composition runtime. Residual ownership,
+weighted in-place accumulation, native-block injection, lazy materialization,
+and exact zero-strength bypass remain unchanged.
 
-  - The node accepts:
-        • one clean conditioning input
-        • one loaded JLC FLUX.2 ControlNet base object
-        • one VAE
-        • two independent control images
-        • independent strength values for both branches
-        • independent start and end percentages for both branches
-        • shared diagnostic control
-
-  - Each branch:
-        • receives an isolated ControlNet copy
-        • receives its own control hint
-        • receives its own strength and timestep range
-        • maintains its own encoded-hint and runtime state
-        • shares the same underlying side-model weights and CoreModelPatcher
-        • is detached from `previous_controlnet` recursion
-
-- Non-Recursive Composition
-  - Both branches are represented by one ControlNet-compatible composition
-    object presented to the ComfyUI sampler.
-
-  - During each active denoising call:
-        • each branch is evaluated independently against the same native
-          FLUX.2 sampler state
-        • each branch produces four residual tensors
-        • corresponding residuals are combined linearly
-        • the combined residuals are injected after native FLUX.2 double
-          blocks 0, 2, 4, and 6
-
-  - The composition path:
-        • does not build a recursive chain between the two active branches
-        • does not duplicate the underlying 4.116-billion-parameter side model
-        • does not mutate the loader's reusable base object
-        • does not use `deepcopy`
-        • preserves independent branch strengths and activation windows
-        • supports exact bypass of inactive or zero-strength branches
-
-- Runtime Integration
-  - The composed wrapper exposes the lifecycle, model, and hook interfaces
-    expected by current ComfyUI sampling and model-management paths.
-
-  - It cooperates with ComfyUI DynamicVRAM behavior and does not replace
-    ComfyUI's loading, offloading, patching, or sampler policy.
-
-  - The Orchestrator requires clean input conditioning with no previously
-    attached ControlNet. Connect it directly after text conditioning rather
-    than after a separate ControlNet Apply node.
-
-- Attribution & License
-  - Concept and implementation by **J. L. Córdova**
-    with development assistance from **ChatGPT (OpenAI)**.
-
-  - The non-recursive composition design builds on the validated JLC
-    ControlNet linearization architecture developed for ComfyUI.
-
-  - Built for interoperability with:
-    https://github.com/comfyanonymous/ComfyUI
-
-  - Copyright (c) 2026 J. L. Córdova
-
-  - Released under the **MIT License**.
+Concept and implementation by J. L. Córdova with development assistance from
+ChatGPT (OpenAI). Released under the MIT License.
 """
 
 from __future__ import annotations
 
 from ..jlc_flux2_controlnet_versions import JLC_FLUX2_CONTROLNET_VERSION
+from ..jlc_flux2_controlnet.composition import JLCFlux2ComposedControl
+
+
+MAX_CONTROL_SLOTS = 4
 
 
 MANIFEST = {
@@ -87,15 +33,13 @@ MANIFEST = {
     "version": JLC_FLUX2_CONTROLNET_VERSION,
     "author": "J. L. Córdova",
     "description": (
-        "Creates a two-branch non-recursive FLUX.2 ControlNet composition "
-        "from one shared side model. Each branch retains an independent "
-        "control image, strength, timestep range, and runtime state while "
-        "sharing the underlying model weights and ComfyUI model patcher."
+        "Creates a two-to-four-branch non-recursive FLUX.2 ControlNet "
+        "composition from one shared side model. Each configured branch "
+        "retains an independent control image, strength, timestep range, "
+        "and runtime state while sharing the underlying model weights and "
+        "ComfyUI model patcher."
     ),
 }
-
-
-from ..jlc_flux2_controlnet.composition import JLCFlux2ComposedControl
 
 
 def _configured_child(
@@ -122,8 +66,31 @@ def _configured_child(
     return child
 
 
+def _optional_configured_child(
+    controlnet,
+    control_image,
+    vae,
+    strength,
+    start_percent,
+    end_percent,
+    diagnostics,
+):
+    if control_image is None:
+        return None
+
+    return _configured_child(
+        controlnet,
+        control_image,
+        vae,
+        strength,
+        start_percent,
+        end_percent,
+        diagnostics,
+    )
+
+
 class JLCFlux2ControlNetOrchestrator:
-    """Apply two independently configured branches from one shared side model."""
+    """Apply two to four detached branches from one shared side model."""
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -159,7 +126,35 @@ class JLCFlux2ControlNetOrchestrator:
                     {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
                 ),
                 "diagnostics": ("BOOLEAN", {"default": True}),
-            }
+            },
+            "optional": {
+                "control_image_3": ("IMAGE",),
+                "strength_3": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent_3": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent_3": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "control_image_4": ("IMAGE",),
+                "strength_4": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent_4": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent_4": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+            },
         }
 
     RETURN_TYPES = ("CONDITIONING",)
@@ -181,40 +176,85 @@ class JLCFlux2ControlNetOrchestrator:
         start_percent_2,
         end_percent_2,
         diagnostics,
+        control_image_3=None,
+        strength_3=0.5,
+        start_percent_3=0.0,
+        end_percent_3=1.0,
+        control_image_4=None,
+        strength_4=0.5,
+        start_percent_4=0.0,
+        end_percent_4=1.0,
     ):
         output = []
+
         for tensor, metadata in conditioning:
             metadata_copy = metadata.copy()
             if metadata_copy.get("control") is not None:
                 raise ValueError(
-                    "JLC Flux2 ControlNet Orchestrator requires clean conditioning with no existing control. "
-                    "Connect it directly after text encoding rather than after an Apply node."
+                    "JLC Flux2 ControlNet Orchestrator requires clean "
+                    "conditioning with no existing control. Connect it directly "
+                    "after text encoding rather than after an Apply node."
                 )
 
-            # Both detached children share the exact same underlying model and
-            # CoreModelPatcher. Only their hints, strengths, ranges, and runtime
-            # caches are independent.
-            child_1 = _configured_child(
-                controlnet,
-                control_image_1,
-                vae,
-                strength_1,
-                start_percent_1,
-                end_percent_1,
-                diagnostics,
+            # Slots 1 and 2 preserve the validated required two-branch surface.
+            # Every copy shares the exact same underlying model and
+            # CoreModelPatcher; only branch-local configuration and caches differ.
+            children = [
+                _configured_child(
+                    controlnet,
+                    control_image_1,
+                    vae,
+                    strength_1,
+                    start_percent_1,
+                    end_percent_1,
+                    diagnostics,
+                ),
+                _configured_child(
+                    controlnet,
+                    control_image_2,
+                    vae,
+                    strength_2,
+                    start_percent_2,
+                    end_percent_2,
+                    diagnostics,
+                ),
+            ]
+
+            # Slots 3 and 4 are fixed optional branches. Absence means that no
+            # child object is created. A connected image with strength 0.0 still
+            # creates the branch and uses the existing exact bypass path.
+            optional_children = (
+                _optional_configured_child(
+                    controlnet,
+                    control_image_3,
+                    vae,
+                    strength_3,
+                    start_percent_3,
+                    end_percent_3,
+                    diagnostics,
+                ),
+                _optional_configured_child(
+                    controlnet,
+                    control_image_4,
+                    vae,
+                    strength_4,
+                    start_percent_4,
+                    end_percent_4,
+                    diagnostics,
+                ),
             )
-            child_2 = _configured_child(
-                controlnet,
-                control_image_2,
-                vae,
-                strength_2,
-                start_percent_2,
-                end_percent_2,
-                diagnostics,
+            children.extend(
+                child for child in optional_children if child is not None
             )
 
+            if len(children) > MAX_CONTROL_SLOTS:
+                raise RuntimeError(
+                    f"Flux2 Orchestrator supports at most "
+                    f"{MAX_CONTROL_SLOTS} configured branches."
+                )
+
             orchestrated_control = JLCFlux2ComposedControl(
-                (child_1, child_2),
+                tuple(children),
                 diagnostics_enabled=bool(diagnostics),
             )
 
@@ -223,3 +263,186 @@ class JLCFlux2ControlNetOrchestrator:
             output.append([tensor, metadata_copy])
 
         return (output,)
+def _attach_clean_composed_control(conditioning, composed_control):
+    output = []
+    for tensor, metadata in conditioning:
+        metadata_copy = metadata.copy()
+        if metadata_copy.get("control") is not None:
+            raise ValueError(
+                "JLC Flux2 ControlNet Orchestrator Advanced requires clean "
+                "positive and negative conditioning with no existing control. "
+                "Connect it directly after text encoding or reference "
+                "conditioning."
+            )
+        metadata_copy["control"] = composed_control
+        metadata_copy["control_apply_to_uncond"] = False
+        output.append([tensor, metadata_copy])
+    return output
+
+
+class JLCFlux2ControlNetOrchestratorAdvanced:
+    """Apply two to four detached branches to positive and negative."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "positive": ("CONDITIONING",),
+                "negative": ("CONDITIONING",),
+                "controlnet": ("JLC_FLUX2_CONTROLNET",),
+                "vae": ("VAE",),
+                "control_image_1": ("IMAGE",),
+                "strength_1": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent_1": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent_1": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "control_image_2": ("IMAGE",),
+                "strength_2": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent_2": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent_2": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "diagnostics": ("BOOLEAN", {"default": True}),
+            },
+            "optional": {
+                "control_image_3": ("IMAGE",),
+                "strength_3": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent_3": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent_3": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "control_image_4": ("IMAGE",),
+                "strength_4": (
+                    "FLOAT",
+                    {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
+                ),
+                "start_percent_4": (
+                    "FLOAT",
+                    {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+                "end_percent_4": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
+    RETURN_NAMES = ("positive", "negative")
+    FUNCTION = "orchestrate"
+    CATEGORY = "JLC/ControlNet/Flux2"
+
+    def orchestrate(
+        self,
+        positive,
+        negative,
+        controlnet,
+        vae,
+        control_image_1,
+        strength_1,
+        start_percent_1,
+        end_percent_1,
+        control_image_2,
+        strength_2,
+        start_percent_2,
+        end_percent_2,
+        diagnostics,
+        control_image_3=None,
+        strength_3=0.5,
+        start_percent_3=0.0,
+        end_percent_3=1.0,
+        control_image_4=None,
+        strength_4=0.5,
+        start_percent_4=0.0,
+        end_percent_4=1.0,
+    ):
+        # Validate both streams before allocating any child branch.
+        for conditioning in (positive, negative):
+            for _, metadata in conditioning:
+                if metadata.get("control") is not None:
+                    raise ValueError(
+                        "JLC Flux2 ControlNet Orchestrator Advanced requires "
+                        "clean positive and negative conditioning with no "
+                        "existing control."
+                    )
+
+        children = [
+            _configured_child(
+                controlnet,
+                control_image_1,
+                vae,
+                strength_1,
+                start_percent_1,
+                end_percent_1,
+                diagnostics,
+            ),
+            _configured_child(
+                controlnet,
+                control_image_2,
+                vae,
+                strength_2,
+                start_percent_2,
+                end_percent_2,
+                diagnostics,
+            ),
+        ]
+
+        optional_children = (
+            _optional_configured_child(
+                controlnet,
+                control_image_3,
+                vae,
+                strength_3,
+                start_percent_3,
+                end_percent_3,
+                diagnostics,
+            ),
+            _optional_configured_child(
+                controlnet,
+                control_image_4,
+                vae,
+                strength_4,
+                start_percent_4,
+                end_percent_4,
+                diagnostics,
+            ),
+        )
+        children.extend(child for child in optional_children if child is not None)
+
+        if len(children) > MAX_CONTROL_SLOTS:
+            raise RuntimeError(
+                f"Flux2 Orchestrator supports at most "
+                f"{MAX_CONTROL_SLOTS} configured branches."
+            )
+
+        composed_control = JLCFlux2ComposedControl(
+            tuple(children),
+            diagnostics_enabled=bool(diagnostics),
+        )
+
+        return (
+            _attach_clean_composed_control(positive, composed_control),
+            _attach_clean_composed_control(negative, composed_control),
+        )

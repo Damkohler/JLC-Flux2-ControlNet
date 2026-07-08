@@ -68,21 +68,31 @@ import os
 from server import PromptServer  # used for static route mounting
 
 from .nodes.jlc_flux2_controlnet_loader_node import JLCFlux2ControlNetLoader
-from .nodes.jlc_flux2_controlnet_apply_node import JLCFlux2ControlNetApplyDiagnostic
-from .nodes.jlc_flux2_controlnet_orchestrator_node import JLCFlux2ControlNetOrchestrator
+from .nodes.jlc_flux2_controlnet_apply_node import (
+    JLCFlux2ControlNetApplyAdvanced,
+    JLCFlux2ControlNetApplyDiagnostic,
+)
+from .nodes.jlc_flux2_controlnet_orchestrator_node import (
+    JLCFlux2ControlNetOrchestrator,
+    JLCFlux2ControlNetOrchestratorAdvanced,
+)
 
 __version__ = "0.0.3-first-injection"
 
 NODE_CLASS_MAPPINGS = {
     "JLCFlux2ControlNetLoader": JLCFlux2ControlNetLoader,
     "JLCFlux2ControlNetApplyDiagnostic": JLCFlux2ControlNetApplyDiagnostic,
+    "JLCFlux2ControlNetApplyAdvanced": JLCFlux2ControlNetApplyAdvanced,
     "JLCFlux2ControlNetOrchestrator": JLCFlux2ControlNetOrchestrator,
+    "JLCFlux2ControlNetOrchestratorAdvanced": JLCFlux2ControlNetOrchestratorAdvanced,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "JLCFlux2ControlNetLoader": "\u2003JLC Flux2 ControlNet Loader",
     "JLCFlux2ControlNetApplyDiagnostic": "\u2003JLC Flux2 ControlNet Apply",
+    "JLCFlux2ControlNetApplyAdvanced": "\u2003JLC Flux2 ControlNet Apply Advanced",
     "JLCFlux2ControlNetOrchestrator": "\u2003JLC Flux2 ControlNet Orchestrator",
+    "JLCFlux2ControlNetOrchestratorAdvanced": "\u2003JLC Flux2 ControlNet Orchestrator Advanced",
 }
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]

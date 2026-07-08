@@ -22,8 +22,32 @@ from comfy.ldm.flux.math import attention as comfy_flux_attention
 
 from .constants import CONTROL_LAYERS, PROJECT_LOG_PREFIX
 
-MODEL_ADAPTER_REVISION = "wave2-hotfix2-modulationout-native-attention"
+MODEL_ADAPTER_REVISION = "wave3-reference-latents-segmented-modulation"
 _REVISION_LOGGED = False
+
+
+
+def _apply_mod(
+    tensor: Tensor,
+    multiplier: Tensor,
+    additive: Tensor | None = None,
+    modulation_dims: list[tuple[int, int, int]] | None = None,
+) -> Tensor:
+    """Apply native Flux modulation, including segmented reference timesteps."""
+    if modulation_dims is None:
+        if additive is not None:
+            return torch.addcmul(additive, tensor, multiplier)
+        return tensor * multiplier
+
+    for start, end, modulation_index in modulation_dims:
+        tensor[:, start:end] *= multiplier[
+            :, modulation_index : modulation_index + 1
+        ]
+        if additive is not None:
+            tensor[:, start:end] += additive[
+                :, modulation_index : modulation_index + 1
+            ]
+    return tensor
 
 
 class JLCFlux2SwiGLU(nn.Module):
@@ -202,6 +226,7 @@ class JLCFlux2ControlTransformerBlock(nn.Module):
         temb_mod_params_txt,
         image_rotary_emb=None,
         attention_mask: Optional[Tensor] = None,
+        modulation_dims_img: list[tuple[int, int, int]] | None = None,
     ) -> tuple[Tensor, Tensor]:
         if self.block_id == 0:
             c = self.before_proj(c) + x
@@ -227,7 +252,17 @@ class JLCFlux2ControlTransformerBlock(nn.Module):
         txt_scale_mlp = txt_mod_mlp.scale
         txt_gate_mlp = txt_mod_mlp.gate
 
-        image_norm = (1 + scale_msa) * self.norm1(c) + shift_msa
+        if modulation_dims_img is None:
+            # Preserve the validated no-reference and single-modulation path
+            # exactly, including its original operator ordering.
+            image_norm = (1 + scale_msa) * self.norm1(c) + shift_msa
+        else:
+            image_norm = _apply_mod(
+                self.norm1(c),
+                1 + scale_msa,
+                shift_msa,
+                modulation_dims_img,
+            )
         text_norm = (
             (1 + txt_scale_msa) * self.norm1_context(encoder_hidden_states)
             + txt_shift_msa
@@ -239,8 +274,28 @@ class JLCFlux2ControlTransformerBlock(nn.Module):
             attention_mask=attention_mask,
         )
 
-        c = c + gate_msa * image_attn
-        c = c + gate_mlp * self.ff((1 + scale_mlp) * self.norm2(c) + shift_mlp)
+        if modulation_dims_img is None:
+            c = c + gate_msa * image_attn
+            c = c + gate_mlp * self.ff(
+                (1 + scale_mlp) * self.norm2(c) + shift_mlp
+            )
+        else:
+            c = c + _apply_mod(
+                image_attn,
+                gate_msa,
+                modulation_dims=modulation_dims_img,
+            )
+            image_mlp_input = _apply_mod(
+                self.norm2(c),
+                1 + scale_mlp,
+                shift_mlp,
+                modulation_dims_img,
+            )
+            c = c + _apply_mod(
+                self.ff(image_mlp_input),
+                gate_mlp,
+                modulation_dims=modulation_dims_img,
+            )
 
         encoder_hidden_states = encoder_hidden_states + txt_gate_msa * text_attn
         encoder_hidden_states = encoder_hidden_states + txt_gate_mlp * self.ff_context(
@@ -311,6 +366,7 @@ class JLCFlux2ControlModel(nn.Module):
         temb_mod_params_txt,
         image_rotary_emb=None,
         attention_mask: Optional[Tensor] = None,
+        modulation_dims_img: list[tuple[int, int, int]] | None = None,
     ) -> list[Tensor]:
         global _REVISION_LOGGED
         if not _REVISION_LOGGED:
@@ -333,6 +389,7 @@ class JLCFlux2ControlModel(nn.Module):
             "temb_mod_params_txt": temb_mod_params_txt,
             "image_rotary_emb": image_rotary_emb,
             "attention_mask": attention_mask,
+            "modulation_dims_img": modulation_dims_img,
         }
         for block in self.control_transformer_blocks:
             encoder_hidden_states, c = block(c, **kwargs)

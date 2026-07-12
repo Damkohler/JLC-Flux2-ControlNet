@@ -1,0 +1,3309 @@
+{
+  "id": "032c8ea3-327f-45e1-9eeb-6723dc0a78bb",
+  "revision": 0,
+  "last_node_id": 207,
+  "last_link_id": 444,
+  "nodes": [
+    {
+      "id": 94,
+      "type": "UNETLoader",
+      "pos": [
+        -2460,
+        -16
+      ],
+      "size": [
+        364,
+        84
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            237
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "UNETLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "flux.2\\flux2_dev_fp8mixed.safetensors",
+        "default"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 96,
+      "type": "CLIPLoader",
+      "pos": [
+        -2460,
+        100
+      ],
+      "size": [
+        364,
+        108
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            233,
+            235
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "CLIPLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "mistral_3_small_flux2_fp8.safetensors",
+        "flux2",
+        "default"
+      ]
+    },
+    {
+      "id": 97,
+      "type": "VAELoader",
+      "pos": [
+        -2460,
+        240
+      ],
+      "size": [
+        364,
+        60
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            234
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "VAELoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ]
+    },
+    {
+      "id": 48,
+      "type": "Flux2Scheduler",
+      "pos": [
+        -284,
+        280
+      ],
+      "size": [
+        212,
+        108
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 250
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 252
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            132
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+        8,
+        850,
+        1726
+      ]
+    },
+    {
+      "id": 16,
+      "type": "KSamplerSelect",
+      "pos": [
+        -284,
+        184
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "euler"
+      ]
+    },
+    {
+      "id": 109,
+      "type": "GetNode",
+      "pos": [
+        -280,
+        568
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            251,
+            252
+          ]
+        }
+      ],
+      "title": "Get_height",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "height"
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 47,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        -284,
+        424
+      ],
+      "size": [
+        212,
+        108
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "widget": {
+            "name": "width"
+          },
+          "link": 249
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "widget": {
+            "name": "height"
+          },
+          "link": 251
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            308,
+            310
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        992,
+        1024,
+        1
+      ]
+    },
+    {
+      "id": 110,
+      "type": "GetNode",
+      "pos": [
+        -280,
+        604
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            249,
+            250
+          ]
+        }
+      ],
+      "title": "Get_width",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "width"
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 114,
+      "type": "GetNode",
+      "pos": [
+        -20,
+        208
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            259
+          ]
+        }
+      ],
+      "title": "Get_VAE",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 13,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        -4,
+        -28
+      ],
+      "size": [
+        236,
+        108
+      ],
+      "flags": {},
+      "order": 51,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 37
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 30
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 19
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 132
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 310
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            296
+          ]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 22,
+      "type": "BasicGuider",
+      "pos": [
+        -284,
+        100
+      ],
+      "size": [
+        212,
+        48
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 333
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 404
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "slot_index": 0,
+          "links": [
+            30
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "BasicGuider"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 182,
+      "type": "GetNode",
+      "pos": [
+        -204,
+        64
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            404
+          ]
+        }
+      ],
+      "title": "Get_conditioning",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "conditioning"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 145,
+      "type": "GetNode",
+      "pos": [
+        -296,
+        64
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            333
+          ]
+        }
+      ],
+      "title": "Get_model",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "model"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        -4,
+        124
+      ],
+      "size": [
+        240,
+        48
+      ],
+      "flags": {},
+      "order": 62,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 296
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 259
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            406
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 140,
+      "type": "SetNode",
+      "pos": [
+        120,
+        212
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 64,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "link": 406
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Set_output",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "output"
+      },
+      "widgets_values": [
+        "output"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 101,
+      "type": "JLC_DynamicLoraLoaderModelOnly",
+      "pos": [
+        -2092,
+        -64
+      ],
+      "size": [
+        408,
+        130
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 237
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            332
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "f529e37832a0b042c1fb178c56fd8d68c2f68411",
+        "Node name for S&R": "JLC_DynamicLoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        1,
+        "01-Flux.2-Favs\\Flux_2-Turbo-LoRA_comfyui.safetensors",
+        1,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        null
+      ]
+    },
+    {
+      "id": 95,
+      "type": "SetNode",
+      "pos": [
+        -2208,
+        336
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "link": 234
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": null
+        }
+      ],
+      "title": "Set_VAE",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "VAE"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 93,
+      "type": "CLIPTextEncode",
+      "pos": [
+        -2396,
+        336
+      ],
+      "size": [
+        276,
+        88
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 233
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "Negative: Not Used",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 144,
+      "type": "SetNode",
+      "pos": [
+        -1804,
+        96
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 48,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "link": 332
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": null
+        }
+      ],
+      "title": "Set_model",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "model"
+      },
+      "widgets_values": [
+        "model"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 189,
+      "type": "INTConstant",
+      "pos": [
+        -1648,
+        104
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "links": [
+            416,
+            418
+          ]
+        }
+      ],
+      "title": "Width",
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "4c8e162490e5b89d7ec55fc43d278641ab866e47",
+        "Node name for S&R": "INTConstant"
+      },
+      "widgets_values": [
+        1024
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 190,
+      "type": "INTConstant",
+      "pos": [
+        -1648,
+        204
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "links": [
+            417,
+            419
+          ]
+        }
+      ],
+      "title": "Height",
+      "properties": {
+        "cnr_id": "comfyui-kjnodes",
+        "ver": "4c8e162490e5b89d7ec55fc43d278641ab866e47",
+        "Node name for S&R": "INTConstant"
+      },
+      "widgets_values": [
+        1536
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 164,
+      "type": "SetNode",
+      "pos": [
+        -1420,
+        204
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 52,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "link": 366
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "title": "Set_resolution",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "resolution"
+      },
+      "widgets_values": [
+        "resolution"
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 111,
+      "type": "ImpactMinMax",
+      "pos": [
+        -1420,
+        168
+      ],
+      "size": [
+        212,
+        80
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 40,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "a",
+          "type": "*",
+          "link": 418
+        },
+        {
+          "name": "b",
+          "type": "*",
+          "link": 419
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            366
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-impact-pack",
+        "ver": "429d0159ad429e64d2b3916e6e7be9c22d025c3c",
+        "Node name for S&R": "ImpactMinMax"
+      },
+      "widgets_values": [
+        false
+      ]
+    },
+    {
+      "id": 108,
+      "type": "SetNode",
+      "pos": [
+        -1420,
+        240
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "link": 417
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "title": "Set_height",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "height"
+      },
+      "widgets_values": [
+        "height"
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 171,
+      "type": "LoadImage",
+      "pos": [
+        -1652,
+        380
+      ],
+      "size": [
+        256,
+        448
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            378
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "title": "ControlNet Image",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ControlNet_Img_wrkfl_01_a.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 112,
+      "type": "DWPreprocessor",
+      "pos": [
+        -1392,
+        380
+      ],
+      "size": [
+        240,
+        224
+      ],
+      "flags": {},
+      "order": 41,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 378
+        },
+        {
+          "name": "resolution",
+          "shape": 7,
+          "type": "INT",
+          "widget": {
+            "name": "resolution"
+          },
+          "link": 369
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            348,
+            400
+          ]
+        },
+        {
+          "name": "POSE_KEYPOINT",
+          "type": "POSE_KEYPOINT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui_controlnet_aux",
+        "ver": "1.0.6",
+        "Node name for S&R": "DWPreprocessor",
+        "aux_id": "Fannovel16/comfyui_controlnet_aux",
+        "ue_properties": {
+          "widget_ue_connectable": {
+            "detect_hand": true,
+            "detect_body": true,
+            "detect_face": true,
+            "resolution": true,
+            "bbox_detector": true,
+            "pose_estimator": true,
+            "scale_stick_for_xinsr_cn": true
+          },
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "enable",
+        "enable",
+        "enable",
+        64,
+        "yolo_nas_l_fp16.onnx",
+        "dw-ll_ucoco_384_bs5.torchscript.pt",
+        "enable"
+      ]
+    },
+    {
+      "id": 165,
+      "type": "GetNode",
+      "pos": [
+        -1572,
+        348
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            369
+          ]
+        }
+      ],
+      "title": "Get_resolution",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "resolution"
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 131,
+      "type": "SetNode",
+      "pos": [
+        -1404,
+        348
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 53,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "link": 348
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Set_ctrl1",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "ctrl1"
+      },
+      "widgets_values": [
+        "ctrl1"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 160,
+      "type": "PreviewImage",
+      "pos": [
+        -1392,
+        640
+      ],
+      "size": [
+        240,
+        384
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 54,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 400
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "ControlNet Hint",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 107,
+      "type": "SetNode",
+      "pos": [
+        -1420,
+        132
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "link": 416
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "title": "Set_width",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "width"
+      },
+      "widgets_values": [
+        "width"
+      ],
+      "color": "#1b4669",
+      "bgcolor": "#29699c"
+    },
+    {
+      "id": 174,
+      "type": "JLCConditionalSaveImage",
+      "pos": [
+        -144,
+        696
+      ],
+      "size": [
+        412,
+        200
+      ],
+      "flags": {},
+      "order": 42,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 409
+        },
+        {
+          "name": "caption",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "name": "switch",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "switch"
+          },
+          "link": 386
+        }
+      ],
+      "outputs": [
+        {
+          "name": "saved_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "91924a5e7ae7eea8dfdf3cec28a03dc1c537353f",
+        "Node name for S&R": "JLCConditionalSaveImage"
+      },
+      "widgets_values": [
+        false,
+        "FALSE",
+        "Flux2_ControlNet_Dev_",
+        "G:\\My Drive\\AI Stuff\\2026-07-31\\ControlNet-Dev",
+        4,
+        ".txt"
+      ]
+    },
+    {
+      "id": 177,
+      "type": "GetNode",
+      "pos": [
+        -300,
+        856
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BOOLEAN",
+          "type": "BOOLEAN",
+          "links": [
+            385,
+            386
+          ]
+        }
+      ],
+      "title": "Get_BOOLEAN",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "BOOLEAN"
+      ]
+    },
+    {
+      "id": 141,
+      "type": "GetNode",
+      "pos": [
+        -292,
+        900
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            407,
+            409
+          ]
+        }
+      ],
+      "title": "Get_output",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "output"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 137,
+      "type": "GetNode",
+      "pos": [
+        -296,
+        964
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            410
+          ]
+        }
+      ],
+      "title": "Get_cache set",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "cache set"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 142,
+      "type": "ComfySwitchNode",
+      "pos": [
+        -144,
+        932
+      ],
+      "size": [
+        412,
+        80
+      ],
+      "flags": {},
+      "order": 43,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "on_false",
+          "type": "IMAGE",
+          "link": 407
+        },
+        {
+          "name": "on_true",
+          "type": "IMAGE",
+          "link": 410
+        },
+        {
+          "name": "switch",
+          "type": "BOOLEAN",
+          "widget": {
+            "name": "switch"
+          },
+          "link": 385
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "IMAGE",
+          "links": [
+            435
+          ]
+        }
+      ],
+      "title": "TRUE = SET UP CACHE; FALSE  = RUN WORKFLOW",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+        false
+      ]
+    },
+    {
+      "id": 176,
+      "type": "SetNode",
+      "pos": [
+        -1008,
+        -200
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 46,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "BOOLEAN",
+          "type": "BOOLEAN",
+          "link": 384
+        }
+      ],
+      "outputs": [
+        {
+          "name": "BOOLEAN",
+          "type": "BOOLEAN",
+          "links": null
+        }
+      ],
+      "title": "Set_BOOLEAN",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "BOOLEAN"
+      },
+      "widgets_values": [
+        "BOOLEAN"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 198,
+      "type": "PreviewImage",
+      "pos": [
+        -588,
+        640
+      ],
+      "size": [
+        240,
+        384
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 59,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 444
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "ControlNet Hint",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 200,
+      "type": "GetNode",
+      "pos": [
+        304,
+        -60
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 16,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            437
+          ]
+        }
+      ],
+      "title": "Get_view",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "view"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 202,
+      "type": "PreviewImage",
+      "pos": [
+        -832,
+        640
+      ],
+      "size": [
+        240,
+        384
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 57,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 443
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "ControlNet Hint",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 195,
+      "type": "LoadImage",
+      "pos": [
+        -1100,
+        380
+      ],
+      "size": [
+        256,
+        448
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            425
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "title": "ControlNet Image",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "ControlNet_Img_wrkfl_01_b.jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 203,
+      "type": "SetNode",
+      "pos": [
+        -624,
+        396
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 58,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "link": 438
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Set_ctrl3",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "ctrl3"
+      },
+      "widgets_values": [
+        "ctrl3"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 181,
+      "type": "SetNode",
+      "pos": [
+        -504,
+        396
+      ],
+      "size": [
+        224,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 63,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 432
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_conditioning",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "conditioning"
+      },
+      "widgets_values": [
+        "conditioning"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 193,
+      "type": "SetNode",
+      "pos": [
+        -744,
+        396
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 56,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "link": 424
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Set_ctrl2",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "ctrl2"
+      },
+      "widgets_values": [
+        "ctrl2"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 117,
+      "type": "GetNode",
+      "pos": [
+        116,
+        280
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            266
+          ]
+        }
+      ],
+      "title": "Get_VAE",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 132,
+      "type": "GetNode",
+      "pos": [
+        -40,
+        568
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 19,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            302
+          ]
+        }
+      ],
+      "title": "Get_ctrl1",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "ctrl1"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 136,
+      "type": "SetNode",
+      "pos": [
+        124,
+        568
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 61,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "link": 408
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Set_cache set",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "cache set"
+      },
+      "widgets_values": [
+        "cache set"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 205,
+      "type": "GetNode",
+      "pos": [
+        -48,
+        604
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            440
+          ]
+        }
+      ],
+      "title": "Get_ctrl2",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "ctrl2"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 206,
+      "type": "GetNode",
+      "pos": [
+        76,
+        604
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 21,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            441
+          ]
+        }
+      ],
+      "title": "Get_ctrl3",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "ctrl3"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 116,
+      "type": "JLCFlux2HintLatentCachePrep",
+      "pos": [
+        -44,
+        328
+      ],
+      "size": [
+        300,
+        210
+      ],
+      "flags": {},
+      "order": 50,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_1",
+          "type": "IMAGE",
+          "link": 302
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 308
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 266
+        },
+        {
+          "name": "image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 440
+        },
+        {
+          "name": "image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 441
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_1",
+          "type": "IMAGE",
+          "links": [
+            408
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "links": []
+        },
+        {
+          "name": "cache_report",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "91924a5e7ae7eea8dfdf3cec28a03dc1c537353f",
+        "Node name for S&R": "JLCFlux2HintLatentCachePrep"
+      },
+      "widgets_values": [
+        3,
+        true,
+        true,
+        null
+      ]
+    },
+    {
+      "id": 191,
+      "type": "JLC_DynamicAuxPreprocessorWrapper",
+      "pos": [
+        -712,
+        428
+      ],
+      "size": [
+        364,
+        174
+      ],
+      "flags": {},
+      "order": 45,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 425
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image_01",
+          "type": "IMAGE",
+          "links": [
+            424,
+            443
+          ]
+        },
+        {
+          "name": "image_02",
+          "type": "IMAGE",
+          "links": [
+            438,
+            444
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "241e80f0662373989fc8a9fca7c1ec7918782f1d",
+        "Node name for S&R": "JLC_DynamicAuxPreprocessorWrapper"
+      },
+      "widgets_values": [
+        2,
+        2048,
+        "ColorPreprocessor",
+        "AnyLineArtPreprocessor_aux",
+        "DISABLED",
+        "DISABLED",
+        "DISABLED",
+        "DISABLED",
+        "DISABLED",
+        "DISABLED",
+        "DISABLED",
+        "DISABLED",
+        null
+      ]
+    },
+    {
+      "id": 204,
+      "type": "GetNode",
+      "pos": [
+        -864,
+        268
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            439
+          ]
+        }
+      ],
+      "title": "Get_ctrl3",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "ctrl3"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 197,
+      "type": "GetNode",
+      "pos": [
+        -864,
+        228
+      ],
+      "size": [
+        212,
+        52
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 23,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            433
+          ]
+        }
+      ],
+      "title": "Get_ctrl2",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "ctrl2"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 153,
+      "type": "GetNode",
+      "pos": [
+        -864,
+        188
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 24,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            430
+          ]
+        }
+      ],
+      "title": "Get_ctrl1",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "ctrl1"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 104,
+      "type": "GetNode",
+      "pos": [
+        -868,
+        144
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 25,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            429
+          ]
+        }
+      ],
+      "title": "Get_VAE",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 175,
+      "type": "PrimitiveBoolean",
+      "pos": [
+        -1556,
+        -232
+      ],
+      "size": [
+        524,
+        60
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BOOLEAN",
+          "type": "BOOLEAN",
+          "links": [
+            384
+          ]
+        }
+      ],
+      "title": "TRUE = SET UP CACHE FOR SPEEDUP; FALSE  = RUN WORKFLOW",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "PrimitiveBoolean"
+      },
+      "widgets_values": [
+        false
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 207,
+      "type": "Note",
+      "pos": [
+        -824,
+        -244
+      ],
+      "size": [
+        384,
+        88
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Run with true to set cache control image cache. Then run again with false to launch workflow. Time and memory pressure of a first run with control net and/or after a server start is cut significantly in a 16 GB VRAM laptop. Rerun with true every time new control images are loaded."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 194,
+      "type": "JLCFlux2ControlNetOrchestrator",
+      "pos": [
+        -712,
+        -60
+      ],
+      "size": [
+        364,
+        422
+      ],
+      "flags": {},
+      "order": 60,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 427
+        },
+        {
+          "name": "controlnet",
+          "type": "JLC_FLUX2_CONTROLNET",
+          "link": 428
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 429
+        },
+        {
+          "name": "control_image_1",
+          "type": "IMAGE",
+          "link": 430
+        },
+        {
+          "name": "control_image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 433
+        },
+        {
+          "name": "control_image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 439
+        }
+      ],
+      "outputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "links": [
+            432
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "91924a5e7ae7eea8dfdf3cec28a03dc1c537353f",
+        "Node name for S&R": "JLCFlux2ControlNetOrchestrator"
+      },
+      "widgets_values": [
+        0.75,
+        0,
+        1,
+        true,
+        1,
+        0,
+        1,
+        0.25,
+        0,
+        0.25,
+        0,
+        0,
+        1,
+        3,
+        null
+      ]
+    },
+    {
+      "id": 199,
+      "type": "SetNode",
+      "pos": [
+        156,
+        1040
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 55,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "link": 435
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "Set_view",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "view"
+      },
+      "widgets_values": [
+        "view"
+      ],
+      "color": "#2a363b",
+      "bgcolor": "#3f5159"
+    },
+    {
+      "id": 201,
+      "type": "PreviewImage",
+      "pos": [
+        280,
+        -28
+      ],
+      "size": [
+        592,
+        908
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 44,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 437
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "title": "View Image",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 187,
+      "type": "SetNode",
+      "pos": [
+        -1812,
+        416
+      ],
+      "size": [
+        224,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 49,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 413
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_Prompt",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "Prompt"
+      },
+      "widgets_values": [
+        "Prompt"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 98,
+      "type": "CLIPTextEncode",
+      "pos": [
+        -2092,
+        128
+      ],
+      "size": [
+        408,
+        248
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 235
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            413
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Positive Prompt)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A full-body photo of a woman standing heroically on top of a small round marble pedestal in front of the dominant skyline of a futuristic 30th Century Manhattan that looms large and imposing, towering behind her at sunset. She has long platinum blonde hair with soft waves and small regal braid details, large purple eyes, blonde eyebrows, and glamorous pink-purple makeup. She has and hourglass shaped body with a narrow waist and large breasts. She wears a pale icy blue bandeau top with silver filigree embroidery and a central purple amethyst jewel brooch, paired with matching bikini bottoms decorated with silver tracery and purple amethyst accents. Her sandals are elegant open-toe strappy high heels in purple amethyst tones, coordinated with silver-and-amethyst jewelry.\n\nShe wears a luxurious but not oversized seven-point silver spiked crown set with purple amethysts. Her right arm is raised high overhead holding a lit jeweled torch, made of polished silver metal with purple amethyst stones and a bright orange flame. The torch aligns with a radiant sunburst in the sky, creating a heroic halo of golden light. Behind her are dramatic glowing clouds, warm cinematic sunset rays, water reflections, and the powerful dominating future Manhattan skyline in the background. The mood is of a classic torchbearer. Use heroic pinup poses: confident stance, left hand on hip or left arm flexed, calm noble expression, subtle camera-facing. Full-body head-to-heels framing."
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 188,
+      "type": "GetNode",
+      "pos": [
+        -1652,
+        36
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 28,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            414
+          ]
+        }
+      ],
+      "title": "Get_Prompt",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "Prompt"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 102,
+      "type": "JLCFlux2ControlNetLoader",
+      "pos": [
+        -1288,
+        16
+      ],
+      "size": [
+        496,
+        60
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "controlnet",
+          "type": "JLC_FLUX2_CONTROLNET",
+          "links": [
+            428
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "ff044e228dd7e1c908bf1bbd25b3a54c1a9522dd",
+        "Node name for S&R": "JLCFlux2ControlNetLoader"
+      },
+      "widgets_values": [
+        "FLUX.2-dev-Fun-Controlnet-Union-2602.safetensors"
+      ]
+    },
+    {
+      "id": 100,
+      "type": "FluxGuidance",
+      "pos": [
+        -1652,
+        -60
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {},
+      "order": 47,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 414
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            427
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        4
+      ],
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 25,
+      "type": "RandomNoise",
+      "pos": [
+        -284,
+        -52
+      ],
+      "size": [
+        212,
+        84
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        666,
+        "fixed"
+      ]
+    }
+  ],
+  "links": [
+    [
+      19,
+      16,
+      0,
+      13,
+      2,
+      "SAMPLER"
+    ],
+    [
+      30,
+      22,
+      0,
+      13,
+      1,
+      "GUIDER"
+    ],
+    [
+      37,
+      25,
+      0,
+      13,
+      0,
+      "NOISE"
+    ],
+    [
+      132,
+      48,
+      0,
+      13,
+      3,
+      "SIGMAS"
+    ],
+    [
+      233,
+      96,
+      0,
+      93,
+      0,
+      "CLIP"
+    ],
+    [
+      234,
+      97,
+      0,
+      95,
+      0,
+      "VAE"
+    ],
+    [
+      235,
+      96,
+      0,
+      98,
+      0,
+      "CLIP"
+    ],
+    [
+      237,
+      94,
+      0,
+      101,
+      0,
+      "MODEL"
+    ],
+    [
+      249,
+      110,
+      0,
+      47,
+      0,
+      "INT"
+    ],
+    [
+      250,
+      110,
+      0,
+      48,
+      0,
+      "INT"
+    ],
+    [
+      251,
+      109,
+      0,
+      47,
+      1,
+      "INT"
+    ],
+    [
+      252,
+      109,
+      0,
+      48,
+      1,
+      "INT"
+    ],
+    [
+      259,
+      114,
+      0,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      266,
+      117,
+      0,
+      116,
+      2,
+      "VAE"
+    ],
+    [
+      296,
+      13,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      302,
+      132,
+      0,
+      116,
+      0,
+      "IMAGE"
+    ],
+    [
+      308,
+      47,
+      0,
+      116,
+      1,
+      "LATENT"
+    ],
+    [
+      310,
+      47,
+      0,
+      13,
+      4,
+      "LATENT"
+    ],
+    [
+      332,
+      101,
+      0,
+      144,
+      0,
+      "MODEL"
+    ],
+    [
+      333,
+      145,
+      0,
+      22,
+      0,
+      "MODEL"
+    ],
+    [
+      348,
+      112,
+      0,
+      131,
+      0,
+      "IMAGE"
+    ],
+    [
+      366,
+      111,
+      0,
+      164,
+      0,
+      "INT"
+    ],
+    [
+      369,
+      165,
+      0,
+      112,
+      1,
+      "INT"
+    ],
+    [
+      378,
+      171,
+      0,
+      112,
+      0,
+      "IMAGE"
+    ],
+    [
+      384,
+      175,
+      0,
+      176,
+      0,
+      "BOOLEAN"
+    ],
+    [
+      385,
+      177,
+      0,
+      142,
+      2,
+      "BOOLEAN"
+    ],
+    [
+      386,
+      177,
+      0,
+      174,
+      2,
+      "BOOLEAN"
+    ],
+    [
+      400,
+      112,
+      0,
+      160,
+      0,
+      "IMAGE"
+    ],
+    [
+      404,
+      182,
+      0,
+      22,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      406,
+      8,
+      0,
+      140,
+      0,
+      "IMAGE"
+    ],
+    [
+      407,
+      141,
+      0,
+      142,
+      0,
+      "IMAGE"
+    ],
+    [
+      408,
+      116,
+      0,
+      136,
+      0,
+      "IMAGE"
+    ],
+    [
+      409,
+      141,
+      0,
+      174,
+      0,
+      "IMAGE"
+    ],
+    [
+      410,
+      137,
+      0,
+      142,
+      1,
+      "IMAGE"
+    ],
+    [
+      413,
+      98,
+      0,
+      187,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      414,
+      188,
+      0,
+      100,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      416,
+      189,
+      0,
+      107,
+      0,
+      "INT"
+    ],
+    [
+      417,
+      190,
+      0,
+      108,
+      0,
+      "INT"
+    ],
+    [
+      418,
+      189,
+      0,
+      111,
+      0,
+      "INT"
+    ],
+    [
+      419,
+      190,
+      0,
+      111,
+      1,
+      "INT"
+    ],
+    [
+      424,
+      191,
+      0,
+      193,
+      0,
+      "IMAGE"
+    ],
+    [
+      425,
+      195,
+      0,
+      191,
+      0,
+      "IMAGE"
+    ],
+    [
+      427,
+      100,
+      0,
+      194,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      428,
+      102,
+      0,
+      194,
+      1,
+      "JLC_FLUX2_CONTROLNET"
+    ],
+    [
+      429,
+      104,
+      0,
+      194,
+      2,
+      "VAE"
+    ],
+    [
+      430,
+      153,
+      0,
+      194,
+      3,
+      "IMAGE"
+    ],
+    [
+      432,
+      194,
+      0,
+      181,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      433,
+      197,
+      0,
+      194,
+      4,
+      "IMAGE"
+    ],
+    [
+      435,
+      142,
+      0,
+      199,
+      0,
+      "IMAGE"
+    ],
+    [
+      437,
+      200,
+      0,
+      201,
+      0,
+      "IMAGE"
+    ],
+    [
+      438,
+      191,
+      1,
+      203,
+      0,
+      "IMAGE"
+    ],
+    [
+      439,
+      204,
+      0,
+      194,
+      5,
+      "IMAGE"
+    ],
+    [
+      440,
+      205,
+      0,
+      116,
+      3,
+      "IMAGE"
+    ],
+    [
+      441,
+      206,
+      0,
+      116,
+      4,
+      "IMAGE"
+    ],
+    [
+      443,
+      191,
+      0,
+      202,
+      0,
+      "IMAGE"
+    ],
+    [
+      444,
+      191,
+      1,
+      198,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 2,
+      "title": "ControlNet Group",
+      "bounding": [
+        -1668,
+        -132,
+        1356,
+        1176
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Solver & Image Cache Group",
+      "bounding": [
+        -300,
+        -132,
+        572,
+        748
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "Models & Prompt",
+      "bounding": [
+        -2468,
+        -132,
+        792,
+        556
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 7,
+      "title": "Setting Up the Hint Latent Cache at First Run Helps Low VRAM Systems Avoid Memory Churn",
+      "bounding": [
+        -1572,
+        -312,
+        1148,
+        168
+      ],
+      "color": "#8A8",
+      "flags": {}
+    },
+    {
+      "id": 10,
+      "title": "Output & File Save Group",
+      "bounding": [
+        -300,
+        628,
+        572,
+        416
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.45949729863574756,
+      "offset": [
+        2690.994268340496,
+        582.2847512508696
+      ]
+    },
+    "frontendVersion": "1.45.19",
+    "workflowRendererVersion": "LG",
+    "groupNodes": {},
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

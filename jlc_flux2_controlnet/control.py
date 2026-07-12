@@ -22,6 +22,10 @@ from .constants import (
     REQUESTS_KEY,
 )
 from .hooks import make_injection_hook_group
+from .hint_latent_cache import (
+    HINT_LATENT_CACHE,
+    make_hint_latent_cache_key,
+)
 
 
 
@@ -255,23 +259,75 @@ class JLCFlux2Control(comfy.controlnet.ControlBase):
                     "please use the JLC apply node with a VAE connection."
                 )
 
-            hint = comfy.utils.common_upscale(
-                self.cond_hint_original,
-                x_noisy.shape[-1] * compression_ratio,
-                x_noisy.shape[-2] * compression_ratio,
-                self.upscale_algorithm,
-                "center",
+            target_pixel_width = x_noisy.shape[-1] * compression_ratio
+            target_pixel_height = x_noisy.shape[-2] * compression_ratio
+            cache_request = None
+            cached_cpu_latent = None
+
+            if HINT_LATENT_CACHE.is_enabled():
+                cache_request = make_hint_latent_cache_key(
+                    image=self.cond_hint_original,
+                    target_latent_width=expected_w,
+                    target_latent_height=expected_h,
+                    target_pixel_width=target_pixel_width,
+                    target_pixel_height=target_pixel_height,
+                    vae=self.vae,
+                    preprocess_image=self.preprocess_image,
+                    interpolation=self.upscale_algorithm,
+                    resize_mode="common_upscale",
+                    crop_mode="center",
+                    latent_format=self.latent_format,
+                )
+                cached_cpu_latent = HINT_LATENT_CACHE.get(
+                    cache_request,
+                    diagnostics=self.diagnostics_enabled,
+                )
+
+            if cached_cpu_latent is None:
+                if self.diagnostics_enabled and cache_request is not None:
+                    logging.info(
+                        "%s Hint-latent cache miss: encoding control image; key=%s.",
+                        PROJECT_LOG_PREFIX,
+                        cache_request.short_key,
+                    )
+
+                hint = comfy.utils.common_upscale(
+                    self.cond_hint_original,
+                    target_pixel_width,
+                    target_pixel_height,
+                    self.upscale_algorithm,
+                    "center",
+                )
+                hint = self.preprocess_image(hint)
+
+                loaded_models = comfy.model_management.loaded_models(
+                    only_currently_used=True
+                )
+                try:
+                    hint = self.vae.encode(hint.movedim(1, -1))
+                finally:
+                    comfy.model_management.load_models_gpu(loaded_models)
+
+                if self.latent_format is not None:
+                    hint = self.latent_format.process_in(hint)
+
+                if cache_request is not None:
+                    HINT_LATENT_CACHE.put(
+                        cache_request,
+                        hint,
+                        diagnostics=self.diagnostics_enabled,
+                    )
+                runtime_latent = hint
+            else:
+                runtime_latent = cached_cpu_latent
+
+            # Always make a runtime-owned copy. A warm-cache hit must never expose
+            # the cache's CPU tensor to downstream mutation, even in CPU-only tests.
+            self.cond_hint = runtime_latent.to(
+                device=x_noisy.device,
+                dtype=dtype,
+                copy=True,
             )
-            hint = self.preprocess_image(hint)
-
-            loaded_models = comfy.model_management.loaded_models(only_currently_used=True)
-            hint = self.vae.encode(hint.movedim(1, -1))
-            comfy.model_management.load_models_gpu(loaded_models)
-
-            if self.latent_format is not None:
-                hint = self.latent_format.process_in(hint)
-
-            self.cond_hint = hint.to(device=x_noisy.device, dtype=dtype)
 
         if x_noisy.shape[0] != self.cond_hint.shape[0]:
             self.cond_hint = comfy.controlnet.broadcast_image_to(

@@ -32,6 +32,13 @@ JLC Flux2 ControlNet Apply
   - The loaded side-model weights and CoreModelPatcher remain shared rather
     than being duplicated for each configured copy.
 
+- Null-Input Contract
+  - Apply nodes require a real control image. A `None` value from a disabled or
+    hidden JLC auxiliary-wrapper slot is rejected explicitly before any tensor
+    operation, ControlNet copy, cache lookup, or conditioning mutation occurs.
+  - Strength zero remains a runtime side-model bypass, not permission to attach
+    an absent control image.
+
 - Runtime Integration
   - The ControlNet side branch is executed through a stateless,
     per-invocation FLUX.2 diffusion-model wrapper.
@@ -80,11 +87,24 @@ MANIFEST = {
     "description": (
         "Configures and attaches one FLUX.2 ControlNet branch to ComfyUI "
         "conditioning with an independent control image, VAE, strength, "
-        "timestep range, and diagnostics. Residuals are injected through a "
-        "stateless native-model wrapper after FLUX.2 double blocks "
-        "0, 2, 4, and 6."
+        "timestep range, and diagnostics. A null control image is rejected "
+        "explicitly so disabled auxiliary-wrapper slots cannot silently pass "
+        "through or configure an invalid branch. Residuals are injected through "
+        "a stateless native-model wrapper after FLUX.2 double blocks 0, 2, 4, "
+        "and 6."
     ),
 }
+
+
+def _require_control_image(control_image, *, node_name: str):
+    """Reject the deliberate absent-control signal before tensor handling."""
+    if control_image is None:
+        raise ValueError(
+            f"{node_name} requires an actual control image, but received None. "
+            "The connected auxiliary-wrapper slot is DISABLED, hidden above "
+            "slot_count, or otherwise absent. Enable that slot or disconnect it."
+        )
+    return control_image
 
 
 class JLCFlux2ControlNetApplyDiagnostic:
@@ -131,6 +151,10 @@ class JLCFlux2ControlNetApplyDiagnostic:
         if start_percent > end_percent:
             raise ValueError("start_percent must be less than or equal to end_percent")
 
+        control_image = _require_control_image(
+            control_image,
+            node_name="JLC Flux2 ControlNet Apply",
+        )
         output = []
         hint_bchw = control_image.movedim(-1, 1)
         for tensor, metadata in conditioning:
@@ -147,6 +171,8 @@ class JLCFlux2ControlNetApplyDiagnostic:
             metadata_copy["control_apply_to_uncond"] = False
             output.append([tensor, metadata_copy])
         return (output,)
+
+
 class JLCFlux2ControlNetApplyAdvanced:
     """Attach one shared ControlNet configuration to positive and negative."""
 
@@ -195,6 +221,10 @@ class JLCFlux2ControlNetApplyAdvanced:
         if start_percent > end_percent:
             raise ValueError("start_percent must be less than or equal to end_percent")
 
+        control_image = _require_control_image(
+            control_image,
+            node_name="JLC Flux2 ControlNet Apply Advanced",
+        )
         hint_bchw = control_image.movedim(-1, 1)
         configured_by_previous = {}
         outputs = []

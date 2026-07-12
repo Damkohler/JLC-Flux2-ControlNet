@@ -3,12 +3,20 @@ import { app } from "/scripts/app.js";
 const ICON_SIZE = 12;
 
 // These are ComfyUI NODE_CLASS_MAPPINGS keys, not display names.
-// Legacy/development aliases are retained so the logo continues to appear
-// while the public node export names are finalized.
+// Keep this list aligned with the package-level NODE_CLASS_MAPPINGS in
+// JLC-Flux2-ControlNet/__init__.py.
 const FLUX2_CONTROLNET_NODE_NAMES = new Set([
     "JLCFlux2ControlNetLoader",
     "JLCFlux2ControlNetApplyDiagnostic",
+    "JLCFlux2ControlNetApplyAdvanced",
     "JLCFlux2ControlNetOrchestrator",
+    "JLCFlux2ControlNetOrchestratorAdvanced",
+    "JLCFlux2ReferenceImageOrchestrator",
+    "JLCFlux2ControlNetInpaintAdapter",
+    "JLCFlux2ControlNetInpaintAdapterAdvanced",
+    "JLCFlux2HintLatentCachePrep",
+    "JLCFlux2ReferenceLatentCachePrep",
+    "JLCConditionalSaveImage",
 ]);
 
 const iconImage = new Image();

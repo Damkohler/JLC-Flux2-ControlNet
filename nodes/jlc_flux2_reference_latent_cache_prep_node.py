@@ -1,0 +1,324 @@
+"""
+JLC Flux2 Reference Latent Cache Prep
+-------------------------------------
+
+- JLC Flux2 ControlNet
+  - This node is part of the **JLC Flux2 ControlNet** package developed
+    by **J. L. Córdova**.
+
+  - Repository
+    https://github.com/Damkohler/JLC-Flux2-ControlNet
+
+- Node Purpose
+  - The **JLC Flux2 Reference Latent Cache Prep** node pre-populates the
+    bounded, process-local CPU cache used for reusable FLUX.2 reference-image
+    VAE latents.
+
+  - It performs only the final reference-image preparation path:
+
+        IMAGE -> final BHWC RGB tensor -> VAE encode -> bounded CPU cache
+
+  - Desired resize, crop, and other image preparation must be completed
+    upstream. The cache key is built from the exact final tensor supplied to
+    this node.
+
+- Workflow Role
+  - Use this node in a mutually exclusive cache-preparation branch before
+    running the normal inference branch in the same ComfyUI server session.
+
+  - The node is intentionally **not** an output node. A downstream lazy Switch,
+    Group Controller, or equivalent execution gate must request this branch.
+    When the prep branch is inactive, this node does not independently pull its
+    image, latent, or VAE dependencies into the execution graph.
+
+  - `IS_CHANGED` returns NaN so the cache side effect is refreshed whenever the
+    prep branch is actually requested, even when the visible inputs are unchanged.
+
+- Reference Alignment Contract
+  - Warmed entries match the Reference Image Orchestrator only when the runtime
+    orchestrator receives the same already-prepared images without additional
+    internal resizing. Use `resize_mode="none"` and the same
+    `reference_latents_method`.
+
+  - The LATENT and VAE input/output are passthrough used only for branch wiring. The
+    first IMAGE is also returned unchanged for workflow routing.
+
+- Attribution & License
+  - Concept and implementation by **J. L. Córdova**
+    with development assistance from **ChatGPT (OpenAI)**.
+
+  - Built for interoperability with:
+    https://github.com/comfyanonymous/ComfyUI
+
+  - Copyright (c) 2026 J. L. Córdova
+  - Released under the **MIT License**.
+"""
+
+from __future__ import annotations
+
+from ..jlc_flux2_controlnet_versions import JLC_FLUX2_CONTROLNET_VERSION
+
+import logging
+from typing import Iterable, Optional
+
+import torch
+
+import comfy.model_management
+
+from ..jlc_flux2_controlnet.constants import PROJECT_LOG_PREFIX
+from ..jlc_flux2_controlnet.reference_latent_cache import (
+    REFERENCE_LATENT_CACHE,
+    clear_reference_latent_cache,
+    make_reference_latent_cache_key,
+    reference_latent_cache_info,
+)
+
+
+
+MANIFEST = {
+    "name": "JLC Flux2 Reference Latent Cache Prep",
+    "version": JLC_FLUX2_CONTROLNET_VERSION,
+    "author": "J. L. Córdova",
+    "description": (
+        "Pre-populates the bounded CPU cache for reusable FLUX.2 reference-image "
+        "VAE latents from final upstream-prepared image tensors. The node is "
+        "branch-driven rather than an independent output sink, allowing a lazy "
+        "Switch or Group Controller to suppress the inactive preparation path."
+    ),
+}
+
+_MAX_REFERENCE_SLOTS = 10
+_REFERENCE_METHODS = ("do_not_set", "offset", "index", "uxo/uno", "index_timestep_zero")
+
+
+def _safe_reference_image(image: torch.Tensor) -> torch.Tensor:
+    """Match the runtime reference-image VAE encode contract: final BHWC RGB."""
+
+    if not isinstance(image, torch.Tensor):
+        raise TypeError(f"Expected IMAGE tensor, got {type(image)!r}.")
+    if image.ndim != 4:
+        raise ValueError(
+            f"Expected IMAGE tensor in BHWC format, got shape {tuple(image.shape)}."
+        )
+    if image.shape[-1] < 3:
+        raise ValueError(
+            f"Expected IMAGE tensor with at least 3 channels, got shape {tuple(image.shape)}."
+        )
+    return image[:, :, :, :3].contiguous()
+
+
+def _iter_slots(
+    slot_count: int,
+    image_1: torch.Tensor,
+    image_2: Optional[torch.Tensor],
+    image_3: Optional[torch.Tensor],
+    image_4: Optional[torch.Tensor],
+    image_5: Optional[torch.Tensor],
+    image_6: Optional[torch.Tensor],
+    image_7: Optional[torch.Tensor],
+    image_8: Optional[torch.Tensor],
+    image_9: Optional[torch.Tensor],
+    image_10: Optional[torch.Tensor],
+) -> Iterable[tuple[int, torch.Tensor]]:
+    images = (
+        image_1,
+        image_2,
+        image_3,
+        image_4,
+        image_5,
+        image_6,
+        image_7,
+        image_8,
+        image_9,
+        image_10,
+    )
+    active = max(1, min(_MAX_REFERENCE_SLOTS, int(slot_count)))
+    for index, image in enumerate(images[:active], start=1):
+        if image is not None:
+            yield index, image
+
+
+class JLCFlux2ReferenceLatentCachePrep:
+    """Pre-warm the shared CPU reference-latent cache for one to ten images.
+
+    This node always prepares when its workflow branch executes. Use a
+    downstream lazy Switch / Group Controller branch to decide whether the prep
+    path or the inference path should run.
+    """
+
+    CATEGORY = "Flux2 ControlNet/Utilities"
+    FUNCTION = "prepare"
+    RETURN_TYPES = ("IMAGE", "LATENT", "STRING", "VAE")
+    RETURN_NAMES = ("image_1", "latent", "cache_report", "vae")
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image_1": ("IMAGE",),
+                "latent": ("LATENT",),
+                "vae": ("VAE",),
+                "slot_count": (
+                    "INT",
+                    {
+                        "default": 2,
+                        "min": 1,
+                        "max": _MAX_REFERENCE_SLOTS,
+                        "step": 1,
+                    },
+                ),
+                "reference_latents_method": (
+                    _REFERENCE_METHODS,
+                    {
+                        "default": "do_not_set",
+                        "tooltip": (
+                            "Must match the Reference Image Orchestrator setting. "
+                            "This prep node assumes any resizing/cropping is handled upstream."
+                        ),
+                    },
+                ),
+                "clear_before_prepare": ("BOOLEAN", {"default": False}),
+                "diagnostics": ("BOOLEAN", {"default": True}),
+            },
+            "optional": {
+                "image_2": ("IMAGE",),
+                "image_3": ("IMAGE",),
+                "image_4": ("IMAGE",),
+                "image_5": ("IMAGE",),
+                "image_6": ("IMAGE",),
+                "image_7": ("IMAGE",),
+                "image_8": ("IMAGE",),
+                "image_9": ("IMAGE",),
+                "image_10": ("IMAGE",),
+            },
+        }
+
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        # This node's primary product is a process-local cache side effect. Run
+        # whenever the prep branch is active so a cleared/reloaded cache is safely
+        # repopulated even if graph inputs did not otherwise change.
+        return float("nan")
+
+    def prepare(
+        self,
+        image_1,
+        latent,
+        vae,
+        slot_count=2,
+        reference_latents_method="do_not_set",
+        clear_before_prepare=False,
+        diagnostics=True,
+        image_2=None,
+        image_3=None,
+        image_4=None,
+        image_5=None,
+        image_6=None,
+        image_7=None,
+        image_8=None,
+        image_9=None,
+        image_10=None,
+    ):
+        if clear_before_prepare:
+            clear_reference_latent_cache(diagnostics=bool(diagnostics))
+
+        if vae is None:
+            raise ValueError(
+                "JLC Flux2 Reference Latent Cache Prep requires a VAE so it can encode reference images."
+            )
+
+        if not REFERENCE_LATENT_CACHE.is_enabled():
+            report = "JLC Flux2 reference-latent cache is disabled or has zero capacity; prep skipped."
+            if diagnostics:
+                logging.info("%s %s", PROJECT_LOG_PREFIX, report)
+            return (image_1, latent, report, vae)
+
+        prepared = 0
+        hits = 0
+        misses = 0
+        inserted = 0
+        skipped = 0
+
+        for slot_index, image in _iter_slots(
+            slot_count,
+            image_1,
+            image_2,
+            image_3,
+            image_4,
+            image_5,
+            image_6,
+            image_7,
+            image_8,
+            image_9,
+            image_10,
+        ):
+            final_image = _safe_reference_image(image)
+            target_height = int(final_image.shape[1])
+            target_width = int(final_image.shape[2])
+
+            cache_request = make_reference_latent_cache_key(
+                image=final_image,
+                vae=vae,
+                resize_mode="none",
+                upscale_method="external",
+                target_width=target_width,
+                target_height=target_height,
+                target_megapixels=None,
+                crop_mode="external",
+                reference_latents_method=str(reference_latents_method or "do_not_set"),
+            )
+
+            cached = REFERENCE_LATENT_CACHE.get(
+                cache_request,
+                diagnostics=bool(diagnostics),
+            )
+            if cached is not None:
+                hits += 1
+                prepared += 1
+                continue
+
+            misses += 1
+            if diagnostics:
+                logging.info(
+                    "%s Reference-latent prep slot %d cache miss: encoding reference image; image_shape=%s, key=%s.",
+                    PROJECT_LOG_PREFIX,
+                    slot_index,
+                    tuple(final_image.shape),
+                    cache_request.short_key,
+                )
+
+            loaded_models = comfy.model_management.loaded_models(
+                only_currently_used=True
+            )
+            try:
+                reference_latent = vae.encode(final_image[:, :, :, :3])
+            finally:
+                comfy.model_management.load_models_gpu(loaded_models)
+
+            if REFERENCE_LATENT_CACHE.put(
+                cache_request,
+                reference_latent,
+                diagnostics=bool(diagnostics),
+            ):
+                inserted += 1
+                prepared += 1
+            else:
+                skipped += 1
+                if diagnostics:
+                    logging.info(
+                        "%s Reference-latent prep slot %d cache insert skipped; key=%s.",
+                        PROJECT_LOG_PREFIX,
+                        slot_index,
+                        cache_request.short_key,
+                    )
+
+        info = reference_latent_cache_info()
+        report = (
+            "JLC Flux2 reference-latent prep complete: "
+            f"prepared={prepared}, hits={hits}, misses={misses}, inserted={inserted}, "
+            f"skipped={skipped}, cache_entries={info['entry_count']}, "
+            f"total_bytes={info['total_bytes']}."
+        )
+        if diagnostics:
+            logging.info("%s %s", PROJECT_LOG_PREFIX, report)
+        return (image_1, latent, report, vae)

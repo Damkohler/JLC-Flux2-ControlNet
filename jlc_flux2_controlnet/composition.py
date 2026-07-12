@@ -16,7 +16,7 @@ _EMPTY_CONTROL = {"input": [], "middle": [], "output": []}
 
 
 class JLCFlux2ComposedControl(comfy.controlnet.ControlBase):
-    """Own several detached Flux.2 controls without recursive chaining.
+    """Own one or more detached Flux.2 controls without recursive chaining.
 
     Child controls share their underlying model patchers with the loader outputs,
     but each child owns its own hint, strength, timestep range, and runtime cache.
@@ -32,8 +32,8 @@ class JLCFlux2ComposedControl(comfy.controlnet.ControlBase):
     ):
         super().__init__()
         self.children = tuple(children)
-        if len(self.children) < 2:
-            raise ValueError("Flux2 composition requires at least two child controls.")
+        if len(self.children) < 1:
+            raise ValueError("Flux2 composition requires at least one child control.")
         if not all(isinstance(child, JLCFlux2Control) for child in self.children):
             raise TypeError("Flux2 composition accepts only JLCFlux2Control children.")
 

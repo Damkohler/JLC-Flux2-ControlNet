@@ -28,7 +28,7 @@ JLC Flux2 Hint Latent Cache Prep
   - The node is intentionally **not** an output node. A downstream lazy Switch,
     Group Controller, or equivalent execution gate must request this branch.
     When the prep branch is inactive, this node does not independently pull its
-    image, latent, or VAE dependencies into the execution graph.
+    image or VAE dependencies into the execution graph.
 
   - `IS_CHANGED` returns NaN so the cache side effect is refreshed whenever the
     prep branch is actually requested, even when the visible inputs are unchanged.
@@ -38,8 +38,14 @@ JLC Flux2 Hint Latent Cache Prep
     control-hint tensor, target latent geometry, VAE identity, preprocessing
     callable, interpolation/crop contract, and FLUX.2 latent format.
 
-  - The LATENT and VAE input/output are passthrough used for branch wiring and target
-    geometry. The first IMAGE is also returned unchanged for workflow routing.
+  - `width` and `height` are user-facing output pixel dimensions. They replace
+    the previous LATENT input and are converted internally to target latent
+    geometry using the active VAE compression ratio.
+
+  - The first IMAGE is returned unchanged for workflow routing.
+    `cache_set` is True when all active connected slots are either cache hits
+    or successful inserts. `cache_report` summarizes hits, misses, inserts,
+    skips, entry count, and total cached CPU bytes.
 
 - Attribution & License
   - Concept and implementation by **J. L. Córdova**
@@ -57,7 +63,7 @@ from __future__ import annotations
 from ..jlc_flux2_controlnet_versions import JLC_FLUX2_CONTROLNET_VERSION
 
 import logging
-from typing import Any, Iterable
+from typing import Iterable
 
 import torch
 
@@ -92,19 +98,6 @@ _FLUX2_CONTROL_COMPRESSION_RATIO = 1
 _MAX_HINT_SLOTS = 4
 
 
-def _latent_samples(latent: dict[str, Any]) -> torch.Tensor:
-    if not isinstance(latent, dict) or "samples" not in latent:
-        raise ValueError(
-            "JLC Flux2 Hint Latent Cache Prep requires a LATENT input with a 'samples' tensor."
-        )
-    samples = latent["samples"]
-    if not isinstance(samples, torch.Tensor) or samples.ndim != 4:
-        raise ValueError(
-            "JLC Flux2 Hint Latent Cache Prep expected latent['samples'] to be a rank-4 tensor."
-        )
-    return samples
-
-
 def _image_to_control_hint(image: torch.Tensor) -> torch.Tensor:
     """Convert ComfyUI IMAGE layout to the ControlBase cond_hint layout.
 
@@ -131,18 +124,32 @@ def _image_to_control_hint(image: torch.Tensor) -> torch.Tensor:
 
 
 def _default_control_preprocess_callable():
-    """Return the same identity preprocess callable shape used by ControlBase.
-
-    The hint-latent cache key includes the preprocess callable description. A
-    fresh ControlBase instance gives the same default callable contract used by
-    JLCFlux2Control unless future code deliberately overrides it.
-    """
+    """Return the same identity preprocess callable shape used by ControlBase."""
 
     return comfy.controlnet.ControlBase().preprocess_image
 
 
 def _default_control_upscale_algorithm() -> str:
     return str(comfy.controlnet.ControlBase().upscale_algorithm)
+
+
+def _validate_target_geometry(width: int, height: int, compression_ratio: int) -> tuple[int, int, int, int]:
+    pixel_width = int(width)
+    pixel_height = int(height)
+    ratio = max(1, int(compression_ratio))
+
+    if pixel_width <= 0 or pixel_height <= 0:
+        raise ValueError("JLC Flux2 Hint Latent Cache Prep requires width and height > 0.")
+
+    if pixel_width % ratio != 0 or pixel_height % ratio != 0:
+        raise ValueError(
+            "JLC Flux2 Hint Latent Cache Prep width/height must be divisible by "
+            f"the active VAE compression ratio ({ratio}). Got width={pixel_width}, height={pixel_height}."
+        )
+
+    expected_w = pixel_width // ratio
+    expected_h = pixel_height // ratio
+    return expected_w, expected_h, pixel_width, pixel_height
 
 
 def _iter_slots(
@@ -169,16 +176,35 @@ class JLCFlux2HintLatentCachePrep:
 
     CATEGORY = "Flux2 ControlNet/Utilities"
     FUNCTION = "prepare"
-    RETURN_TYPES = ("IMAGE", "LATENT", "STRING", "VAE")
-    RETURN_NAMES = ("image_1", "latent", "cache_report", "vae" )
+    RETURN_TYPES = ("IMAGE", "BOOLEAN", "STRING")
+    RETURN_NAMES = ("image_1", "cache_set", "cache_report")
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image_1": ("IMAGE",),
-                "latent": ("LATENT",),
                 "vae": ("VAE",),
+                "image_1": ("IMAGE",),
+                "width": (
+                    "INT",
+                    {
+                        "default": 1024,
+                        "min": 16,
+                        "max": 16384,
+                        "step": 16,
+                        "tooltip": "Final output/image width used by the inference latent. Hint images may differ and will be resized to this width before VAE encoding.",
+                    },
+                ),
+                "height": (
+                    "INT",
+                    {
+                        "default": 1024,
+                        "min": 16,
+                        "max": 16384,
+                        "step": 16,
+                        "tooltip": "Final output/image height used by the inference latent. Hint images may differ and will be resized to this height before VAE encoding.",
+                    },
+                ),
                 "slot_count": (
                     "INT",
                     {
@@ -200,16 +226,14 @@ class JLCFlux2HintLatentCachePrep:
 
     @classmethod
     def IS_CHANGED(cls, **kwargs):
-        # This node's primary product is a process-local cache side effect. Run
-        # whenever the prep branch is active so a cleared/reloaded cache is safely
-        # repopulated even if graph inputs did not otherwise change.
         return float("nan")
 
     def prepare(
         self,
         image_1,
-        latent,
         vae,
+        width=1024,
+        height=1024,
         slot_count=4,
         clear_before_prepare=False,
         diagnostics=True,
@@ -217,10 +241,6 @@ class JLCFlux2HintLatentCachePrep:
         image_3=None,
         image_4=None,
     ):
-        samples = _latent_samples(latent)
-        expected_h = int(samples.shape[-2])
-        expected_w = int(samples.shape[-1])
-
         if clear_before_prepare:
             clear_hint_latent_cache(diagnostics=bool(diagnostics))
 
@@ -233,13 +253,17 @@ class JLCFlux2HintLatentCachePrep:
             report = "JLC Flux2 hint-latent cache is disabled or has zero capacity; prep skipped."
             if diagnostics:
                 logging.info("%s %s", PROJECT_LOG_PREFIX, report)
-            return (image_1, latent, report, vae)
+            return (image_1, False, report)
 
         compression_ratio = _FLUX2_CONTROL_COMPRESSION_RATIO * int(
             vae.spacial_compression_encode()
         )
-        target_pixel_width = int(expected_w * compression_ratio)
-        target_pixel_height = int(expected_h * compression_ratio)
+        expected_w, expected_h, target_pixel_width, target_pixel_height = _validate_target_geometry(
+            int(width),
+            int(height),
+            compression_ratio,
+        )
+
         latent_format = comfy.latent_formats.Flux2()
         preprocess_image = _default_control_preprocess_callable()
         upscale_algorithm = _default_control_upscale_algorithm()
@@ -335,4 +359,5 @@ class JLCFlux2HintLatentCachePrep:
         )
         if diagnostics:
             logging.info("%s %s", PROJECT_LOG_PREFIX, report)
-        return (image_1, latent, report, vae)
+        cache_set = prepared > 0 and skipped == 0
+        return (image_1, bool(cache_set), report)

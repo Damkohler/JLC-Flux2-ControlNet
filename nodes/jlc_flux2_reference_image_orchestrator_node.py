@@ -62,9 +62,10 @@ JLC Flux2 Reference Image Orchestrator
     VAE encoding. Conditioning outputs retain detached CPU latents so ComfyUI's
     node-output cache does not unnecessarily retain VAE GPU tensors.
 
-  - This contract aligns with **JLC Flux2 Reference Latent Cache Prep** when both
-    nodes receive the same final upstream-prepared image tensors and use the same
-    `reference_latents_method` setting.
+  - This contract aligns with **JLC Flux2 Reference Latent Cache Prep** whenever
+    both nodes receive the same final upstream-prepared image tensors and VAE.
+    Cache identity is method-agnostic because native reference-method selection
+    is applied later as conditioning metadata and does not alter VAE encoding.
 
 - Workflow Role
   - Use this node as the stable native multi-reference path for FLUX.2.
@@ -117,7 +118,7 @@ except Exception:  # pragma: no cover - permits helper-local inspection.
     )
 
 
-REFERENCE_IMAGE_ORCHESTRATOR_VERSION = "1.0.0"
+REFERENCE_IMAGE_ORCHESTRATOR_VERSION = "1.0.1"
 
 MANIFEST = {
     "name": "JLC Flux2 Reference Image Orchestrator",
@@ -128,8 +129,9 @@ MANIFEST = {
         "dynamic reference-image slots, exact per-slot enable/disable behavior, "
         "native slot-ordered reference_latents appending, positive/negative "
         "routing, optional native reference-method selection, and a bounded "
-        "CPU reference-latent cache that avoids repeated VAE encoding. No "
-        "reference weighting, latent scaling, fusion, pooling, or non-native "
+        "method-agnostic CPU reference-latent cache that avoids repeated VAE "
+        "encoding across native reference-method changes. No reference "
+        "weighting, latent scaling, fusion, pooling, or non-native "
         "composition is performed."
     ),
     "base_package_version": JLC_FLUX2_CONTROLNET_VERSION,
@@ -350,7 +352,6 @@ class JLCFlux2ReferenceImageOrchestrator:
         image: torch.Tensor,
         vae: Any,
         slot_index: int,
-        reference_latents_method: str,
         cache_active: bool,
         diagnostics: bool,
         stats: dict[str, Any],
@@ -371,7 +372,6 @@ class JLCFlux2ReferenceImageOrchestrator:
                 target_height=target_height,
                 target_megapixels=None,
                 crop_mode=_REFERENCE_CACHE_CROP_MODE,
-                reference_latents_method=reference_latents_method,
             )
             cached = REFERENCE_LATENT_CACHE.get(
                 request,
@@ -489,6 +489,7 @@ class JLCFlux2ReferenceImageOrchestrator:
             "slot_count": slot_count,
             "cache_enabled_requested": bool(cache_enabled),
             "cache_active": cache_active,
+            "cache_key_method_agnostic": True,
             "cache_hits": 0,
             "cache_misses": 0,
             "cache_inserts": 0,
@@ -533,7 +534,6 @@ class JLCFlux2ReferenceImageOrchestrator:
                 image=image,
                 vae=vae,
                 slot_index=slot_index,
-                reference_latents_method=reference_latents_method,
                 cache_active=cache_active,
                 diagnostics=bool(diagnostics),
                 stats=stats,

@@ -161,14 +161,14 @@ def _validate_node_class_mappings() -> None:
 _validate_node_class_mappings()
 
 
-JLC_FLUX2_CONTROLNET_ICON = "🧠"
+JLC_FLUX2_CONTROLNET_ICON = "🕸️🔗🕸️🔗🕸️"
 JLC_FLUX2_CONTROLNET_NAME = (
     f"{JLC_FLUX2_CONTROLNET_ICON} JLC Flux2 ControlNet"
 )
 print(f"{JLC_FLUX2_CONTROLNET_NAME} loading...")
-for node_name in sorted(NODE_CLASS_MAPPINGS.keys()):
-    node_cls = NODE_CLASS_MAPPINGS[node_name]
-    print(f"  {node_name} -> {node_cls.__module__}.{node_cls.__name__}")
+# for node_name in sorted(NODE_CLASS_MAPPINGS.keys()):
+#     node_cls = NODE_CLASS_MAPPINGS[node_name]
+#     print(f"  {node_name} -> {node_cls.__module__}.{node_cls.__name__}")
 print(f"{JLC_FLUX2_CONTROLNET_NAME} loaded {len(NODE_CLASS_MAPPINGS)} nodes.")
 
 

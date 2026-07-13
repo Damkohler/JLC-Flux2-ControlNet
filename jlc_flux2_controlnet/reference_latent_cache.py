@@ -2,10 +2,16 @@
 
 This sibling cache is intentionally separate from the proven ControlNet
 ``hint_latent_cache.py`` path. It stores only VAE-encoded reference-image
-latents produced from the final image tensor that is sent to ``vae.encode``.
+latents produced from the final image tensor sent to ``vae.encode``.
+
+Cache identity is deliberately reference-method agnostic. Native FLUX.2
+reference methods control downstream token positioning through conditioning
+metadata; they do not alter the VAE-encoded reference latent. One cached
+image/VAE latent can therefore be reused safely under any native method.
 
 Cached tensors are detached, contiguous CPU tensors. GPU tensors, sampler
-state, residuals, token blocks, and model patches are never retained here.
+state, residuals, token blocks, conditioning metadata, and model patches are
+never retained here.
 """
 
 from __future__ import annotations
@@ -30,7 +36,7 @@ except Exception:  # pragma: no cover - keeps standalone syntax/import checks si
     PROJECT_LOG_PREFIX = "[JLC Flux2]"
 
 
-REFERENCE_PREPROCESS_CONTRACT_REVISION = "jlc-flux2-reference-latent-v1"
+REFERENCE_PREPROCESS_CONTRACT_REVISION = "jlc-flux2-reference-latent-v2"
 REFERENCE_LATENT_CONTRACT = "flux2-native-reference-latent"
 _DEFAULT_MAX_ENTRIES = 32
 _DEFAULT_MAX_CPU_BYTES = 512 * 1024 * 1024
@@ -215,7 +221,6 @@ def make_reference_latent_cache_key(
     target_height: Optional[int] = None,
     target_megapixels: Optional[float] = None,
     crop_mode: str = "center",
-    reference_latents_method: str = "do_not_set",
     latent_contract: str = REFERENCE_LATENT_CONTRACT,
     preprocessing_revision: str = REFERENCE_PREPROCESS_CONTRACT_REVISION,
 ) -> ReferenceLatentCacheKey:
@@ -225,7 +230,9 @@ def make_reference_latent_cache_key(
     ``vae.encode(image[:, :, :, :3])``. Hashing the final tensor keeps this
     helper independent of the caller's original image source and preprocessing
     implementation while still including human-readable preprocessing fields in
-    the canonical key for diagnostics and future contract changes.
+    the canonical key for diagnostics and future contract changes. Native
+    reference-method selection is intentionally excluded because it is applied
+    later as conditioning metadata and cannot change the encoded latent.
     """
 
     image_digest = tensor_fingerprint(image)
@@ -243,10 +250,7 @@ def make_reference_latent_cache_key(
         "target_height": None if target_height is None else int(target_height),
         "target_megapixels": None if target_megapixels is None else float(target_megapixels),
         "crop_mode": str(crop_mode),
-        # This does not change the encoded latent, but including it prevents
-        # accidental cross-contract reuse if a future method-specific reference
-        # representation is introduced.
-        "reference_latents_method": str(reference_latents_method),
+        "reference_method_scope": "conditioning_only",
     }
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()

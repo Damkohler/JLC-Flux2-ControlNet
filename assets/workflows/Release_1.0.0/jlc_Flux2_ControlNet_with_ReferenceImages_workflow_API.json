@@ -1,0 +1,860 @@
+{
+  "8": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "97",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "25",
+        0
+      ],
+      "guider": [
+        "22",
+        0
+      ],
+      "sampler": [
+        "16",
+        0
+      ],
+      "sigmas": [
+        "48",
+        0
+      ],
+      "latent_image": [
+        "47",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "16": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "22": {
+    "inputs": {
+      "model": [
+        "101",
+        0
+      ],
+      "conditioning": [
+        "346:336",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "Basic Guider"
+    }
+  },
+  "25": {
+    "inputs": {
+      "noise_seed": [
+        "349",
+        0
+      ]
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "47": {
+    "inputs": {
+      "width": [
+        "189",
+        0
+      ],
+      "height": [
+        "190",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "Empty Flux 2 Latent"
+    }
+  },
+  "48": {
+    "inputs": {
+      "steps": [
+        "355",
+        0
+      ],
+      "width": [
+        "189",
+        0
+      ],
+      "height": [
+        "190",
+        0
+      ]
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  },
+  "93": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "96",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative: Not Used"
+    }
+  },
+  "94": {
+    "inputs": {
+      "unet_name": "flux.2\\flux2_dev_fp8mixed.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "96": {
+    "inputs": {
+      "clip_name": "mistral_3_small_flux2_fp8.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "97": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "98": {
+    "inputs": {
+      "text": "A full-body photo of a woman standing heroically on top of a small round marble pedestal in front of the dominant skyline of a futuristic 30th Century Manhattan that looms large and imposing, towering behind her at sunset. She has long platinum blonde hair with soft waves and small regal braid details, large purple eyes, blonde eyebrows, and glamorous pink-purple makeup. She has and hourglass shaped body with a narrow waist and large breasts. She wears a pale icy blue bandeau top with silver filigree embroidery and a central purple amethyst jewel brooch, paired with matching bikini bottoms decorated with silver tracery and purple amethyst accents. Her sandals are elegant open-toe strappy high heels in purple amethyst tones, coordinated with silver-and-amethyst jewelry.\n\nShe wears a luxurious but not oversized seven-point silver spiked crown set with purple amethysts. Her right arm is raised high overhead holding a lit jeweled torch, made of polished silver metal with purple amethyst stones and a bright orange flame. The torch aligns with a radiant sunburst in the sky, creating a heroic halo of golden light. Behind her are dramatic glowing clouds, warm cinematic sunset rays, water reflections, and the powerful dominating future Manhattan skyline in the background. The mood is of a classic torchbearer. Use heroic pinup poses: confident stance, left hand on hip or left arm flexed, calm noble expression, subtle camera-facing. Full-body head-to-heels framing.",
+      "clip": [
+        "96",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "100": {
+    "inputs": {
+      "guidance": 4,
+      "conditioning": [
+        "98",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "101": {
+    "inputs": {
+      "slot_count": 1,
+      "lora_01": "01-Flux.2-Favs\\Flux_2-Turbo-LoRA_comfyui.safetensors",
+      "strength_01": 1,
+      "lora_02": "None",
+      "strength_02": 0,
+      "lora_03": "None",
+      "strength_03": 0,
+      "lora_04": "None",
+      "strength_04": 0,
+      "lora_05": "None",
+      "strength_05": 0,
+      "lora_06": "None",
+      "strength_06": 0,
+      "lora_07": "None",
+      "strength_07": 0,
+      "lora_08": "None",
+      "strength_08": 0,
+      "lora_09": "None",
+      "strength_09": 0,
+      "lora_10": "None",
+      "strength_10": 0,
+      "Update Visible Slots": null,
+      "model": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "JLC_DynamicLoraLoaderModelOnly",
+    "_meta": {
+      "title": " JLC LoRA Loader - Multi Model"
+    }
+  },
+  "111": {
+    "inputs": {
+      "mode": false,
+      "a": [
+        "189",
+        0
+      ],
+      "b": [
+        "190",
+        0
+      ]
+    },
+    "class_type": "ImpactMinMax",
+    "_meta": {
+      "title": "ImpactMinMax"
+    }
+  },
+  "142": {
+    "inputs": {
+      "switch": [
+        "175",
+        0
+      ],
+      "on_false": [
+        "8",
+        0
+      ],
+      "on_true": [
+        "380:375",
+        0
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "TRUE = SET UP CACHE; FALSE  = RUN WORKFLOW"
+    }
+  },
+  "174": {
+    "inputs": {
+      "switch": [
+        "175",
+        0
+      ],
+      "run_when": "FALSE",
+      "filename_prefix": "Flux2_ControlNet_Dev_",
+      "output_folder": "G:\\My Drive\\AI Stuff\\2026-07-31\\ControlNet-Dev",
+      "compress_level": 4,
+      "caption_file_extension": ".txt",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "JLCConditionalSaveImage",
+    "_meta": {
+      "title": " JLC Conditional Save Image"
+    }
+  },
+  "175": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "TRUE = SET UP CACHE FOR SPEEDUP; FALSE  = RUN WORKFLOW"
+    }
+  },
+  "189": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "Width"
+    }
+  },
+  "190": {
+    "inputs": {
+      "value": 1536
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "Height"
+    }
+  },
+  "201": {
+    "inputs": {
+      "images": [
+        "142",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "View Image"
+    }
+  },
+  "216": {
+    "inputs": {
+      "apply_to": "positive_only",
+      "reference_latents_method": "do_not_set",
+      "slot_count": 10,
+      "enabled_1": true,
+      "enabled_2": true,
+      "enabled_3": true,
+      "enabled_4": false,
+      "enabled_5": false,
+      "enabled_6": false,
+      "enabled_7": false,
+      "enabled_8": false,
+      "enabled_9": false,
+      "enabled_10": false,
+      "cache_enabled": false,
+      "cache_max_entries": 32,
+      "cache_max_cpu_mb": 1024,
+      "clear_cache_before_run": false,
+      "diagnostics": true,
+      "Update Visible Slots": null,
+      "positive": [
+        "100",
+        0
+      ],
+      "negative": [
+        "229",
+        0
+      ],
+      "vae": [
+        "97",
+        0
+      ],
+      "reference_image_1": [
+        "237",
+        0
+      ],
+      "reference_image_2": [
+        "243",
+        0
+      ],
+      "reference_image_3": [
+        "241",
+        0
+      ],
+      "reference_image_4": [
+        "238",
+        0
+      ],
+      "reference_image_5": [
+        "245",
+        0
+      ],
+      "reference_image_6": [
+        "239",
+        0
+      ],
+      "reference_image_7": [
+        "240",
+        0
+      ],
+      "reference_image_8": [
+        "242",
+        0
+      ],
+      "reference_image_9": [
+        "246",
+        0
+      ],
+      "reference_image_10": [
+        "244",
+        0
+      ]
+    },
+    "class_type": "JLCFlux2ReferenceImageOrchestrator",
+    "_meta": {
+      "title": " JLC Flux2 Reference Image Orchestrator"
+    }
+  },
+  "229": {
+    "inputs": {
+      "text": "Not used by Flux2-dev but required input by some nodes.",
+      "clip": [
+        "96",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative)"
+    }
+  },
+  "237": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00009_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "238": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00003_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "239": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00007_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "240": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00002_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "241": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00008_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "242": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00001_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "243": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00010_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "244": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00004_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "245": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00006_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "246": {
+    "inputs": {
+      "image": "DolLoRA_Ref01_00005_.png",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": [
+        "301",
+        0
+      ],
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": " JLC Load & Resize Image"
+    }
+  },
+  "301": {
+    "inputs": {
+      "value": 1024
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "Reference Images - Max Dimension"
+    }
+  },
+  "310": {
+    "inputs": {
+      "slot_count": 10,
+      "clear_before_prepare": [
+        "384",
+        0
+      ],
+      "diagnostics": true,
+      "Update Visible Slots": null,
+      "image_1": [
+        "237",
+        0
+      ],
+      "vae": [
+        "97",
+        0
+      ],
+      "image_2": [
+        "243",
+        0
+      ],
+      "image_3": [
+        "241",
+        0
+      ],
+      "image_4": [
+        "238",
+        0
+      ],
+      "image_5": [
+        "245",
+        0
+      ],
+      "image_6": [
+        "239",
+        0
+      ],
+      "image_7": [
+        "240",
+        0
+      ],
+      "image_8": [
+        "242",
+        0
+      ],
+      "image_9": [
+        "246",
+        0
+      ],
+      "image_10": [
+        "244",
+        0
+      ]
+    },
+    "class_type": "JLCFlux2ReferenceLatentCachePrep",
+    "_meta": {
+      "title": " JLC Flux2 Reference Latent Cache Prep"
+    }
+  },
+  "349": {
+    "inputs": {
+      "value": 17
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Noise Value"
+    }
+  },
+  "355": {
+    "inputs": {
+      "value": 8
+    },
+    "class_type": "INTConstant",
+    "_meta": {
+      "title": "Sampler Steps"
+    }
+  },
+  "358": {
+    "inputs": {
+      "strength": 0.7,
+      "start_percent": 0,
+      "end_percent": 1,
+      "diagnostics": true,
+      "conditioning": [
+        "216",
+        0
+      ],
+      "controlnet": [
+        "369",
+        0
+      ],
+      "vae": [
+        "97",
+        0
+      ],
+      "control_image": [
+        "361",
+        0
+      ]
+    },
+    "class_type": "JLCFlux2ControlNetApplyDiagnostic",
+    "_meta": {
+      "title": " JLC Flux2 ControlNet Apply"
+    }
+  },
+  "360": {
+    "inputs": {
+      "image": "ControlNet_Img_wrkfl_01_a.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ControlNet Image"
+    }
+  },
+  "361": {
+    "inputs": {
+      "detect_hand": "enable",
+      "detect_body": "enable",
+      "detect_face": "enable",
+      "resolution": [
+        "111",
+        0
+      ],
+      "bbox_detector": "yolo_nas_l_fp16.onnx",
+      "pose_estimator": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "scale_stick_for_xinsr_cn": "enable",
+      "image": [
+        "360",
+        0
+      ]
+    },
+    "class_type": "DWPreprocessor",
+    "_meta": {
+      "title": "DWPose Estimator"
+    }
+  },
+  "362": {
+    "inputs": {
+      "images": [
+        "361",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "ControlNet Hint"
+    }
+  },
+  "369": {
+    "inputs": {
+      "controlnet_name": "FLUX.2-dev-Fun-Controlnet-Union-2602.safetensors"
+    },
+    "class_type": "JLCFlux2ControlNetLoader",
+    "_meta": {
+      "title": " JLC Flux2 ControlNet Loader"
+    }
+  },
+  "370": {
+    "inputs": {
+      "width": [
+        "189",
+        0
+      ],
+      "height": [
+        "190",
+        0
+      ],
+      "slot_count": 1,
+      "clear_before_prepare": [
+        "384",
+        0
+      ],
+      "diagnostics": true,
+      "Update Visible Slots": null,
+      "image_1": [
+        "361",
+        0
+      ],
+      "vae": [
+        "97",
+        0
+      ]
+    },
+    "class_type": "JLCFlux2HintLatentCachePrep",
+    "_meta": {
+      "title": " JLC Flux2 Hint Latent Cache Prep"
+    }
+  },
+  "384": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Clear image baches before setup?"
+    }
+  },
+  "380:375": {
+    "inputs": {
+      "any_01": [
+        "370",
+        0
+      ],
+      "any_02": [
+        "310",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  },
+  "346:336": {
+    "inputs": {
+      "any_01": [
+        "358",
+        0
+      ],
+      "any_02": [
+        "216",
+        0
+      ]
+    },
+    "class_type": "Any Switch (rgthree)",
+    "_meta": {
+      "title": "Any Switch (rgthree)"
+    }
+  }
+}

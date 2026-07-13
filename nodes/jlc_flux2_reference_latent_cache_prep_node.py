@@ -11,37 +11,73 @@ JLC Flux2 Reference Latent Cache Prep
 
 - Node Purpose
   - The **JLC Flux2 Reference Latent Cache Prep** node pre-populates the
-    bounded, process-local CPU cache used for reusable FLUX.2 reference-image
-    VAE latents.
+    bounded, process-local CPU cache used by the JLC Flux2 Reference Image
+    Orchestrator.
 
-  - It performs only the final reference-image preparation path:
+  - It performs only the reusable reference-latent preparation path:
 
-        IMAGE -> final BHWC RGB tensor -> VAE encode -> bounded CPU cache
+        upstream-prepared IMAGE
+            -> final contiguous BHWC RGB tensor
+            -> VAE encode
+            -> detached CPU latent
+            -> bounded shared cache
 
-  - Desired resize, crop, and other image preparation must be completed
-    upstream. The cache key is built from the exact final tensor supplied to
-    this node.
+  - Desired resizing, cropping, padding, placement, or other image preparation
+    must be completed upstream. The exact final image tensor supplied here is
+    the tensor fingerprinted for cache identity and passed to `vae.encode`.
 
-- Workflow Role
-  - Use this node in a mutually exclusive cache-preparation branch before
-    running the normal inference branch in the same ComfyUI server session.
+- Method-Agnostic Cache Contract
+  - Native FLUX.2 `reference_latents_method` selection is deliberately absent
+    from this node.
+
+  - Reference methods affect downstream reference-token positioning through
+    conditioning metadata. They do not alter the result of VAE-encoding the
+    prepared image.
+
+  - Cache identity therefore depends on the final prepared image, VAE identity,
+    preprocessing contract, and latent contract—but not on the later reference
+    method selected by the Orchestrator.
+
+- Slot Contract
+  - The node accepts one required image and up to nine optional images.
+
+  - `slot_count` is authoritative. Only connected images within the active slot
+    range are prepared; empty optional slots are skipped without promotion.
+
+  - Images are encoded independently and cached independently. Slot order does
+    not alter latent values or cache identity.
+
+- Workflow and Execution Contract
+  - Use this node in a mutually exclusive cache-preparation branch before the
+    normal inference branch, within the same ComfyUI server process.
 
   - The node is intentionally **not** an output node. A downstream lazy Switch,
-    Group Controller, or equivalent execution gate must request this branch.
-    When the prep branch is inactive, this node does not independently pull its
-    image, latent, or VAE dependencies into the execution graph.
+    Group Controller, or equivalent execution gate must request the preparation
+    branch. An inactive branch does not pull image or VAE dependencies into
+    execution.
 
   - `IS_CHANGED` returns NaN so the cache side effect is refreshed whenever the
-    prep branch is actually requested, even when the visible inputs are unchanged.
+    preparation branch is actually requested, even when visible inputs have not
+    changed.
 
-- Reference Alignment Contract
-  - Warmed entries match the Reference Image Orchestrator only when the runtime
-    orchestrator receives the same already-prepared images without additional
-    internal resizing. Use `resize_mode="none"` and the same
-    `reference_latents_method`.
+- Cache Safety and Churn Reduction
+  - Cached latents are detached, contiguous CPU tensors. The cache retains no
+    GPU tensors, sampler state, residuals, token blocks, conditioning objects,
+    or model patches.
 
-  - The LATENT and VAE input/output are passthrough used only for branch wiring. The
-    first IMAGE is also returned unchanged for workflow routing.
+  - Warm cache hits avoid repeated reference-image VAE encoding and reduce the
+    VAE load/offload churn that otherwise occurs at inference startup.
+
+  - The cache remains bounded by the shared reference-cache entry and CPU-memory
+    limits. `clear_before_prepare` can explicitly reset all shared reference
+    entries before repopulation.
+
+- Passthrough Outputs
+  - `image_1` is returned unchanged for branch routing.
+
+  - `cache_set` is True when all active connected slots are either cache hits
+    or successful inserts. `cache_report` summarizes hits, misses, inserts,
+    skips, entry count, and total cached CPU bytes.
 
 - Attribution & License
   - Concept and implementation by **J. L. Córdova**
@@ -51,6 +87,7 @@ JLC Flux2 Reference Latent Cache Prep
     https://github.com/comfyanonymous/ComfyUI
 
   - Copyright (c) 2026 J. L. Córdova
+
   - Released under the **MIT License**.
 """
 
@@ -74,21 +111,28 @@ from ..jlc_flux2_controlnet.reference_latent_cache import (
 )
 
 
+REFERENCE_LATENT_CACHE_PREP_VERSION = "1.1.0"
 
 MANIFEST = {
     "name": "JLC Flux2 Reference Latent Cache Prep",
-    "version": JLC_FLUX2_CONTROLNET_VERSION,
+    "version": REFERENCE_LATENT_CACHE_PREP_VERSION,
     "author": "J. L. Córdova",
     "description": (
-        "Pre-populates the bounded CPU cache for reusable FLUX.2 reference-image "
-        "VAE latents from final upstream-prepared image tensors. The node is "
-        "branch-driven rather than an independent output sink, allowing a lazy "
-        "Switch or Group Controller to suppress the inactive preparation path."
+        "Pre-populates the bounded, process-local CPU cache for reusable "
+        "FLUX.2 reference-image VAE latents. Cache identity is method-agnostic: "
+        "the final prepared image and VAE determine the latent, while native "
+        "reference-method selection remains downstream conditioning metadata. "
+        "The branch-driven node supports up to ten slots and avoids repeated "
+        "VAE encoding and associated model churn during inference."
     ),
+    "base_package_version": JLC_FLUX2_CONTROLNET_VERSION,
+    "cache_contract_revision": "jlc-flux2-reference-latent-v2",
+    "reference_method_scope": "conditioning_only",
+    "status": "stable",
+    "license": "MIT",
 }
 
 _MAX_REFERENCE_SLOTS = 10
-_REFERENCE_METHODS = ("do_not_set", "offset", "index", "uxo/uno", "index_timestep_zero")
 
 
 def _safe_reference_image(image: torch.Tensor) -> torch.Tensor:
@@ -148,16 +192,19 @@ class JLCFlux2ReferenceLatentCachePrep:
 
     CATEGORY = "Flux2 ControlNet/Utilities"
     FUNCTION = "prepare"
-    RETURN_TYPES = ("IMAGE", "LATENT", "STRING", "VAE")
-    RETURN_NAMES = ("image_1", "latent", "cache_report", "vae")
+    RETURN_TYPES = ("IMAGE", "BOOLEAN", "STRING")
+    RETURN_NAMES = ("image_1", "cache_set", "cache_report")
+    DESCRIPTION = (
+        "Pre-warms the method-agnostic CPU cache for reusable FLUX.2 "
+        "reference-image VAE latents without executing the inference branch."
+    )
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image_1": ("IMAGE",),
-                "latent": ("LATENT",),
                 "vae": ("VAE",),
+                "image_1": ("IMAGE",),
                 "slot_count": (
                     "INT",
                     {
@@ -165,16 +212,6 @@ class JLCFlux2ReferenceLatentCachePrep:
                         "min": 1,
                         "max": _MAX_REFERENCE_SLOTS,
                         "step": 1,
-                    },
-                ),
-                "reference_latents_method": (
-                    _REFERENCE_METHODS,
-                    {
-                        "default": "do_not_set",
-                        "tooltip": (
-                            "Must match the Reference Image Orchestrator setting. "
-                            "This prep node assumes any resizing/cropping is handled upstream."
-                        ),
                     },
                 ),
                 "clear_before_prepare": ("BOOLEAN", {"default": False}),
@@ -195,18 +232,13 @@ class JLCFlux2ReferenceLatentCachePrep:
 
     @classmethod
     def IS_CHANGED(cls, **kwargs):
-        # This node's primary product is a process-local cache side effect. Run
-        # whenever the prep branch is active so a cleared/reloaded cache is safely
-        # repopulated even if graph inputs did not otherwise change.
         return float("nan")
 
     def prepare(
         self,
         image_1,
-        latent,
         vae,
         slot_count=2,
-        reference_latents_method="do_not_set",
         clear_before_prepare=False,
         diagnostics=True,
         image_2=None,
@@ -231,7 +263,7 @@ class JLCFlux2ReferenceLatentCachePrep:
             report = "JLC Flux2 reference-latent cache is disabled or has zero capacity; prep skipped."
             if diagnostics:
                 logging.info("%s %s", PROJECT_LOG_PREFIX, report)
-            return (image_1, latent, report, vae)
+            return (image_1, False, report)
 
         prepared = 0
         hits = 0
@@ -265,7 +297,6 @@ class JLCFlux2ReferenceLatentCachePrep:
                 target_height=target_height,
                 target_megapixels=None,
                 crop_mode="external",
-                reference_latents_method=str(reference_latents_method or "do_not_set"),
             )
 
             cached = REFERENCE_LATENT_CACHE.get(
@@ -321,4 +352,5 @@ class JLCFlux2ReferenceLatentCachePrep:
         )
         if diagnostics:
             logging.info("%s %s", PROJECT_LOG_PREFIX, report)
-        return (image_1, latent, report, vae)
+        cache_set = prepared > 0 and skipped == 0
+        return (image_1, bool(cache_set), report)

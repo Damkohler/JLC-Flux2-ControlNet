@@ -112,8 +112,8 @@ class JLCFlux2ControlNetApplyDiagnostic:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "conditioning": ("CONDITIONING",),
                 "controlnet": ("JLC_FLUX2_CONTROLNET",),
+                "conditioning": ("CONDITIONING",),
                 "vae": ("VAE",),
                 "control_image": ("IMAGE",),
                 "strength": (
@@ -135,12 +135,12 @@ class JLCFlux2ControlNetApplyDiagnostic:
     RETURN_TYPES = ("CONDITIONING",)
     RETURN_NAMES = ("conditioning",)
     FUNCTION = "apply_controlnet"
-    CATEGORY = "JLC/ControlNet/Flux2"
+    CATEGORY = "Flux2 Controlnet"
 
     def apply_controlnet(
         self,
-        conditioning,
         controlnet,
+        conditioning,
         vae,
         control_image,
         strength,
@@ -180,9 +180,9 @@ class JLCFlux2ControlNetApplyAdvanced:
     def INPUT_TYPES(cls):
         return {
             "required": {
+                "controlnet": ("JLC_FLUX2_CONTROLNET",),
                 "positive": ("CONDITIONING",),
                 "negative": ("CONDITIONING",),
-                "controlnet": ("JLC_FLUX2_CONTROLNET",),
                 "vae": ("VAE",),
                 "control_image": ("IMAGE",),
                 "strength": (
@@ -204,13 +204,13 @@ class JLCFlux2ControlNetApplyAdvanced:
     RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("positive", "negative")
     FUNCTION = "apply_controlnet"
-    CATEGORY = "JLC/ControlNet/Flux2"
+    CATEGORY = "Flux2 Controlnet"
 
     def apply_controlnet(
         self,
+        controlnet,
         positive,
         negative,
-        controlnet,
         vae,
         control_image,
         strength,

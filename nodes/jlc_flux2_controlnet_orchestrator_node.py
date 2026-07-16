@@ -468,7 +468,7 @@ class JLCFlux2ControlNetOrchestrator:
     RETURN_TYPES = ("CONDITIONING",)
     RETURN_NAMES = ("conditioning",)
     FUNCTION = "orchestrate"
-    CATEGORY = "JLC/ControlNet/Flux2"
+    CATEGORY = "Flux2 Controlnet"
 
     def orchestrate(
         self,
@@ -643,7 +643,7 @@ class JLCFlux2ControlNetOrchestratorAdvanced:
     RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
     RETURN_NAMES = ("positive", "negative")
     FUNCTION = "orchestrate"
-    CATEGORY = "JLC/ControlNet/Flux2"
+    CATEGORY = "Flux2 Controlnet"
 
     def orchestrate(
         self,

@@ -1,0 +1,1860 @@
+{
+  "id": "ca32263a-cfb1-4054-a096-88966f757cc2",
+  "revision": 0,
+  "last_node_id": 643,
+  "last_link_id": 1095,
+  "nodes": [
+    {
+      "id": 41,
+      "type": "VAELoader",
+      "pos": [
+        -3096,
+        1316
+      ],
+      "size": [
+        216,
+        60
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            1059
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "VAELoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ]
+    },
+    {
+      "id": 636,
+      "type": "JLC_LoadAndResizeImage",
+      "pos": [
+        -2344,
+        1624
+      ],
+      "size": [
+        360,
+        744
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            1084
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "f529e37832a0b042c1fb178c56fd8d68c2f68411",
+        "Node name for S&R": "JLC_LoadAndResizeImage"
+      },
+      "widgets_values": [
+        "DolLoRA_Ref01_00001_ (1).png",
+        "scale shorter dimension",
+        1,
+        960,
+        672,
+        1024,
+        1024,
+        1,
+        "area",
+        16,
+        "image"
+      ]
+    },
+    {
+      "id": 635,
+      "type": "JLC_LoadAndResizeImage",
+      "pos": [
+        -3148,
+        1624
+      ],
+      "size": [
+        400,
+        744
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            1082
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "f529e37832a0b042c1fb178c56fd8d68c2f68411",
+        "Node name for S&R": "JLC_LoadAndResizeImage"
+      },
+      "widgets_values": [
+        "DolLoRA_Ref01_00002_.jpg",
+        "scale shorter dimension",
+        1,
+        960,
+        672,
+        1024,
+        1024,
+        1,
+        "area",
+        16,
+        "image"
+      ]
+    },
+    {
+      "id": 626,
+      "type": "JLC_LoadAndResizeImage",
+      "pos": [
+        -2728,
+        1624
+      ],
+      "size": [
+        360,
+        744
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            1083
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "f529e37832a0b042c1fb178c56fd8d68c2f68411",
+        "Node name for S&R": "JLC_LoadAndResizeImage"
+      },
+      "widgets_values": [
+        "DolLoRA_Ref01_00009_.jpg",
+        "scale shorter dimension",
+        1,
+        960,
+        672,
+        1024,
+        1024,
+        1,
+        "area",
+        16,
+        "image"
+      ]
+    },
+    {
+      "id": 40,
+      "type": "CLIPLoader",
+      "pos": [
+        -3096,
+        1168
+      ],
+      "size": [
+        216,
+        108
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            26,
+            1077
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "CLIPLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "mistral_3_small_flux2_fp8.safetensors",
+        "flux2",
+        "default"
+      ]
+    },
+    {
+      "id": 37,
+      "type": "CLIPTextEncode",
+      "pos": [
+        -2860,
+        1184
+      ],
+      "size": [
+        408,
+        248
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            25
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Positive Prompt)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A highly detailed digital illustration of a beautiful woman with soft, rounded facial features and a defined jawline, vibrant blue eyes, framed by light faint almost blonde eyebrows, thick lashes, and styled pink lips. She has voluminous, wavy platinum blonde hair parted to the side. She has hyper-femenine hourglass figure. Her skin is glowing, glossy, and sun-kissed. She is wearing small gold hoop earrings and a glossy lavender V-neck swimsuit. Plain white background, polished aesthetic. She stands in a dynamic contrapposto pose; her right arm is raised high and bent at the elbow with her hand resting behind her hair, while her left arm is raised to shoulder level with the hand relaxed in a graceful gesture.\n\nShe is wearing a sleek, light lavender-colored halter neck bathing suit with a sharp, deep V-neckline. Her arms are raised gracefully, with one hand resting near her long hair and the other bent elegantly at the wrist. Her skin and outfit exhibit a subtle, premium glossy reflection. She wears classic, thick metallic gold hoop earrings, and her shoulders are slightly turned to accentuate the dynamic, curved posture."
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 4,
+      "type": "JLCFlux2ReferenceImageOrchestrator",
+      "pos": [
+        -1944,
+        1140
+      ],
+      "size": [
+        356,
+        424
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 23
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 24
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 1067
+        },
+        {
+          "name": "reference_image_1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 1082
+        },
+        {
+          "name": "reference_image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 1083
+        },
+        {
+          "name": "reference_image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 1084
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": null
+        },
+        {
+          "name": "first_reference_image",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "diagnostics_json",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "ae79c1babc72b96a6aa2429bbc77f095e35f9e7b",
+        "Node name for S&R": "JLCFlux2ReferenceImageOrchestrator"
+      },
+      "widgets_values": [
+        "positive_only",
+        "do_not_set",
+        3,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        32,
+        256,
+        false,
+        true,
+        null
+      ]
+    },
+    {
+      "id": 3,
+      "type": "JLCFlux2ControlNetApplyDiagnostic",
+      "pos": [
+        -1448,
+        1148
+      ],
+      "size": [
+        300,
+        192
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "controlnet",
+          "type": "JLC_FLUX2_CONTROLNET",
+          "link": 1065
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 2
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 1060
+        },
+        {
+          "name": "control_image",
+          "type": "IMAGE",
+          "link": 1078
+        }
+      ],
+      "outputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "links": [
+            1089
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "ae79c1babc72b96a6aa2429bbc77f095e35f9e7b",
+        "Node name for S&R": "JLCFlux2ControlNetApplyDiagnostic"
+      },
+      "widgets_values": [
+        0.85,
+        0,
+        1,
+        true
+      ]
+    },
+    {
+      "id": 620,
+      "type": "GetNode",
+      "pos": [
+        -1568,
+        1224
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            1060
+          ]
+        }
+      ],
+      "title": "Get_VAE",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 641,
+      "type": "SetNode",
+      "pos": [
+        -1108,
+        1176
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "link": 1089
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": null
+        }
+      ],
+      "title": "Set_conditioning",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "conditioning"
+      },
+      "widgets_values": [
+        "conditioning"
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 628,
+      "type": "JLC_LoadAndResizeImage",
+      "pos": [
+        -1948,
+        1624
+      ],
+      "size": [
+        372,
+        748
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            1078
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null
+        },
+        {
+          "name": "width",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "f529e37832a0b042c1fb178c56fd8d68c2f68411",
+        "Node name for S&R": "JLC_LoadAndResizeImage"
+      },
+      "widgets_values": [
+        "ControlNet_Pose_Input_.png",
+        "scale longer dimension",
+        1,
+        1536,
+        1024,
+        1024,
+        1024,
+        1,
+        "area",
+        16,
+        "image"
+      ]
+    },
+    {
+      "id": 607,
+      "type": "Flux2Scheduler",
+      "pos": [
+        -1444,
+        1512
+      ],
+      "size": [
+        212,
+        108
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            1092
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+        8,
+        1024,
+        1536
+      ]
+    },
+    {
+      "id": 606,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        -1444,
+        1668
+      ],
+      "size": [
+        212,
+        108
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            1093
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1536,
+        1
+      ]
+    },
+    {
+      "id": 39,
+      "type": "UNETLoader",
+      "pos": [
+        -3096,
+        1040
+      ],
+      "size": [
+        304,
+        84
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            1062
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "UNETLoader",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "flux.2\\flux2_dev_fp8mixed.safetensors",
+        "default"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 38,
+      "type": "CLIPTextEncode",
+      "pos": [
+        -2440,
+        1288
+      ],
+      "size": [
+        232,
+        88
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1077
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            24
+          ]
+        }
+      ],
+      "title": "CLIP Text Encode (Negative)",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.19.3",
+        "Node name for S&R": "CLIPTextEncode",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.8",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "Not used by Flux2-dev but required input by some nodes."
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 639,
+      "type": "SetNode",
+      "pos": [
+        -2312,
+        1116
+      ],
+      "size": [
+        210,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "link": 1087
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": null
+        }
+      ],
+      "title": "Set_model",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "model"
+      },
+      "widgets_values": [
+        "model"
+      ],
+      "color": "#223",
+      "bgcolor": "#335"
+    },
+    {
+      "id": 624,
+      "type": "JLC_DynamicLoraLoaderModelOnly",
+      "pos": [
+        -2764,
+        1000
+      ],
+      "size": [
+        408,
+        132
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1062
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            1087
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "jlc-comfyui-nodes",
+        "ver": "f529e37832a0b042c1fb178c56fd8d68c2f68411",
+        "Node name for S&R": "JLC_DynamicLoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        1,
+        "01-Flux.2-Favs\\Flux_2-Turbo-LoRA_comfyui.safetensors",
+        1,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        "None",
+        0,
+        null
+      ]
+    },
+    {
+      "id": 623,
+      "type": "RandomNoise",
+      "pos": [
+        -1444,
+        1384
+      ],
+      "size": [
+        212,
+        84
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            1091
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        671,
+        "fixed"
+      ]
+    },
+    {
+      "id": 643,
+      "type": "63da81b9-b43f-4265-baa5-221cf642820b",
+      "pos": [
+        -1200,
+        1388
+      ],
+      "size": [
+        288,
+        68
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 1091
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 1092
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 1093
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1094,
+            1095
+          ]
+        }
+      ],
+      "title": "Sampler, Guider, VAE Decode",
+      "properties": {
+        "proxyWidgets": [],
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 637,
+      "type": "JLCConditionalSaveImage",
+      "pos": [
+        -888,
+        1300
+      ],
+      "size": [
+        284,
+        200
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1094
+        },
+        {
+          "name": "caption",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "saved_path",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "91924a5e7ae7eea8dfdf3cec28a03dc1c537353f",
+        "Node name for S&R": "JLCConditionalSaveImage"
+      },
+      "widgets_values": [
+        false,
+        "FALSE",
+        "Flux2_ControlNet_Dev_",
+        "G:\\My Drive\\AI Stuff\\2026-07-31\\ControlNet-Dev",
+        4,
+        ".txt"
+      ]
+    },
+    {
+      "id": 36,
+      "type": "FluxGuidance",
+      "pos": [
+        -2440,
+        1184
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.71",
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        0.1
+      ],
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 625,
+      "type": "JLCFlux2ControlNetLoader",
+      "pos": [
+        -2120,
+        1000
+      ],
+      "size": [
+        512,
+        60
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "controlnet",
+          "type": "JLC_FLUX2_CONTROLNET",
+          "links": [
+            1065
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "Damkohler/JLC-Flux2-ControlNet",
+        "ver": "ae79c1babc72b96a6aa2429bbc77f095e35f9e7b",
+        "Node name for S&R": "JLCFlux2ControlNetLoader"
+      },
+      "widgets_values": [
+        "FLUX.2-dev-Fun-Controlnet-Union-2602.safetensors"
+      ]
+    },
+    {
+      "id": 627,
+      "type": "GetNode",
+      "pos": [
+        -2180,
+        1272
+      ],
+      "size": [
+        212,
+        36
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            1067
+          ]
+        }
+      ],
+      "title": "Get_VAE",
+      "properties": {
+        "Node name for S&R": "GetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 619,
+      "type": "SetNode",
+      "pos": [
+        -2864,
+        1480
+      ],
+      "size": [
+        212,
+        60
+      ],
+      "flags": {
+        "collapsed": true
+      },
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "link": 1059
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": null
+        }
+      ],
+      "title": "Set_VAE",
+      "properties": {
+        "Node name for S&R": "SetNode",
+        "aux_id": "kijai/ComfyUI-KJNodes",
+        "previousName": "VAE"
+      },
+      "widgets_values": [
+        "VAE"
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 638,
+      "type": "PreviewImage",
+      "pos": [
+        -1196,
+        1548
+      ],
+      "size": [
+        592,
+        868
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1095
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.25.0",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      2,
+      4,
+      0,
+      3,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      23,
+      36,
+      0,
+      4,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      24,
+      38,
+      0,
+      4,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      25,
+      37,
+      0,
+      36,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      26,
+      40,
+      0,
+      37,
+      0,
+      "CLIP"
+    ],
+    [
+      1059,
+      41,
+      0,
+      619,
+      0,
+      "VAE"
+    ],
+    [
+      1060,
+      620,
+      0,
+      3,
+      2,
+      "VAE"
+    ],
+    [
+      1062,
+      39,
+      0,
+      624,
+      0,
+      "MODEL"
+    ],
+    [
+      1065,
+      625,
+      0,
+      3,
+      0,
+      "JLC_FLUX2_CONTROLNET"
+    ],
+    [
+      1067,
+      627,
+      0,
+      4,
+      2,
+      "VAE"
+    ],
+    [
+      1077,
+      40,
+      0,
+      38,
+      0,
+      "CLIP"
+    ],
+    [
+      1078,
+      628,
+      0,
+      3,
+      3,
+      "IMAGE"
+    ],
+    [
+      1082,
+      635,
+      0,
+      4,
+      3,
+      "IMAGE"
+    ],
+    [
+      1083,
+      626,
+      0,
+      4,
+      4,
+      "IMAGE"
+    ],
+    [
+      1084,
+      636,
+      0,
+      4,
+      5,
+      "IMAGE"
+    ],
+    [
+      1087,
+      624,
+      0,
+      639,
+      0,
+      "MODEL"
+    ],
+    [
+      1089,
+      3,
+      0,
+      641,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      1091,
+      623,
+      0,
+      643,
+      0,
+      "NOISE"
+    ],
+    [
+      1092,
+      607,
+      0,
+      643,
+      1,
+      "SIGMAS"
+    ],
+    [
+      1093,
+      606,
+      0,
+      643,
+      2,
+      "LATENT"
+    ],
+    [
+      1094,
+      643,
+      0,
+      637,
+      0,
+      "IMAGE"
+    ],
+    [
+      1095,
+      643,
+      0,
+      638,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "definitions": {
+    "subgraphs": [
+      {
+        "id": "63da81b9-b43f-4265-baa5-221cf642820b",
+        "version": 1,
+        "state": {
+          "lastGroupId": 0,
+          "lastNodeId": 643,
+          "lastLinkId": 1095,
+          "lastRerouteId": 0
+        },
+        "revision": 0,
+        "config": {},
+        "name": "Sampler, Guider, VAE Decode",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            -1252,
+            1801,
+            128,
+            108
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            -376,
+            1800,
+            128,
+            68
+          ]
+        },
+        "inputs": [
+          {
+            "id": "084ded5a-3b4a-4043-9b0b-c9a468e1afde",
+            "name": "noise",
+            "type": "NOISE",
+            "linkIds": [
+              1061
+            ],
+            "localized_name": "noise",
+            "pos": [
+              -1148,
+              1825
+            ]
+          },
+          {
+            "id": "d988e1ee-0a72-454d-9d8c-f9353f2c9cbd",
+            "name": "sigmas",
+            "type": "SIGMAS",
+            "linkIds": [
+              1054
+            ],
+            "localized_name": "sigmas",
+            "pos": [
+              -1148,
+              1845
+            ]
+          },
+          {
+            "id": "ea2970b0-cdf5-4741-87dc-96ceb6caba43",
+            "name": "latent_image",
+            "type": "LATENT",
+            "linkIds": [
+              1055
+            ],
+            "localized_name": "latent_image",
+            "pos": [
+              -1148,
+              1865
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "1184959e-502a-45e0-8489-c29477031d45",
+            "name": "IMAGE",
+            "type": "IMAGE",
+            "linkIds": [
+              1085,
+              1085
+            ],
+            "localized_name": "IMAGE",
+            "pos": [
+              -352,
+              1824
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 609,
+            "type": "KSamplerSelect",
+            "pos": [
+              -1124,
+              2016
+            ],
+            "size": [
+              212,
+              60
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "localized_name": "SAMPLER",
+                "name": "SAMPLER",
+                "type": "SAMPLER",
+                "links": [
+                  1053
+                ]
+              }
+            ],
+            "properties": {
+              "cnr_id": "comfy-core",
+              "ver": "0.3.71",
+              "Node name for S&R": "KSamplerSelect"
+            },
+            "widgets_values": [
+              "euler"
+            ]
+          },
+          {
+            "id": 640,
+            "type": "GetNode",
+            "pos": [
+              -1168,
+              1688
+            ],
+            "size": [
+              212,
+              60
+            ],
+            "flags": {
+              "collapsed": true
+            },
+            "order": 2,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "MODEL",
+                "type": "MODEL",
+                "links": [
+                  1088
+                ]
+              }
+            ],
+            "title": "Get_model",
+            "properties": {
+              "Node name for S&R": "GetNode",
+              "aux_id": "kijai/ComfyUI-KJNodes"
+            },
+            "widgets_values": [
+              "model"
+            ],
+            "color": "#223",
+            "bgcolor": "#335"
+          },
+          {
+            "id": 642,
+            "type": "GetNode",
+            "pos": [
+              -1192,
+              1740
+            ],
+            "size": [
+              212,
+              60
+            ],
+            "flags": {
+              "collapsed": true
+            },
+            "order": 3,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "CONDITIONING",
+                "type": "CONDITIONING",
+                "links": [
+                  1090
+                ]
+              }
+            ],
+            "title": "Get_conditioning",
+            "properties": {
+              "Node name for S&R": "GetNode",
+              "aux_id": "kijai/ComfyUI-KJNodes"
+            },
+            "widgets_values": [
+              "conditioning"
+            ],
+            "color": "#332922",
+            "bgcolor": "#593930"
+          },
+          {
+            "id": 616,
+            "type": "BasicGuider",
+            "pos": [
+              -1008,
+              1688
+            ],
+            "size": [
+              160,
+              48
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "model",
+                "name": "model",
+                "type": "MODEL",
+                "link": 1088
+              },
+              {
+                "localized_name": "conditioning",
+                "name": "conditioning",
+                "type": "CONDITIONING",
+                "link": 1090
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "GUIDER",
+                "name": "GUIDER",
+                "type": "GUIDER",
+                "slot_index": 0,
+                "links": [
+                  1052
+                ]
+              }
+            ],
+            "properties": {
+              "cnr_id": "comfy-core",
+              "ver": "0.3.71",
+              "Node name for S&R": "BasicGuider"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 615,
+            "type": "SamplerCustomAdvanced",
+            "pos": [
+              -812,
+              1780
+            ],
+            "size": [
+              216,
+              108
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "noise",
+                "name": "noise",
+                "type": "NOISE",
+                "link": 1061
+              },
+              {
+                "localized_name": "guider",
+                "name": "guider",
+                "type": "GUIDER",
+                "link": 1052
+              },
+              {
+                "localized_name": "sampler",
+                "name": "sampler",
+                "type": "SAMPLER",
+                "link": 1053
+              },
+              {
+                "localized_name": "sigmas",
+                "name": "sigmas",
+                "type": "SIGMAS",
+                "link": 1054
+              },
+              {
+                "localized_name": "latent_image",
+                "name": "latent_image",
+                "type": "LATENT",
+                "link": 1055
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "output",
+                "name": "output",
+                "type": "LATENT",
+                "slot_index": 0,
+                "links": [
+                  1049
+                ]
+              },
+              {
+                "localized_name": "denoised_output",
+                "name": "denoised_output",
+                "type": "LATENT",
+                "links": []
+              }
+            ],
+            "properties": {
+              "cnr_id": "comfy-core",
+              "ver": "0.3.71",
+              "Node name for S&R": "SamplerCustomAdvanced"
+            },
+            "widgets_values": []
+          },
+          {
+            "id": 614,
+            "type": "GetNode",
+            "pos": [
+              -752,
+              1948
+            ],
+            "size": [
+              212,
+              36
+            ],
+            "flags": {
+              "collapsed": true
+            },
+            "order": 0,
+            "mode": 0,
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  1050
+                ]
+              }
+            ],
+            "title": "Get_VAE",
+            "properties": {
+              "Node name for S&R": "GetNode",
+              "aux_id": "kijai/ComfyUI-KJNodes"
+            },
+            "widgets_values": [
+              "VAE"
+            ],
+            "color": "#322",
+            "bgcolor": "#533"
+          },
+          {
+            "id": 613,
+            "type": "VAEDecode",
+            "pos": [
+              -552,
+              1820
+            ],
+            "size": [
+              144,
+              48
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "samples",
+                "name": "samples",
+                "type": "LATENT",
+                "link": 1049
+              },
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 1050
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "IMAGE",
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "slot_index": 0,
+                "links": [
+                  1085
+                ]
+              }
+            ],
+            "properties": {
+              "cnr_id": "comfy-core",
+              "ver": "0.3.71",
+              "Node name for S&R": "VAEDecode"
+            },
+            "widgets_values": []
+          }
+        ],
+        "groups": [],
+        "links": [
+          {
+            "id": 1088,
+            "origin_id": 640,
+            "origin_slot": 0,
+            "target_id": 616,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 1090,
+            "origin_id": 642,
+            "origin_slot": 0,
+            "target_id": 616,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 1052,
+            "origin_id": 616,
+            "origin_slot": 0,
+            "target_id": 615,
+            "target_slot": 1,
+            "type": "GUIDER"
+          },
+          {
+            "id": 1053,
+            "origin_id": 609,
+            "origin_slot": 0,
+            "target_id": 615,
+            "target_slot": 2,
+            "type": "SAMPLER"
+          },
+          {
+            "id": 1049,
+            "origin_id": 615,
+            "origin_slot": 0,
+            "target_id": 613,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 1050,
+            "origin_id": 614,
+            "origin_slot": 0,
+            "target_id": 613,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 1061,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 615,
+            "target_slot": 0,
+            "type": "NOISE"
+          },
+          {
+            "id": 1054,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 615,
+            "target_slot": 3,
+            "type": "SIGMAS"
+          },
+          {
+            "id": 1055,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 615,
+            "target_slot": 4,
+            "type": "LATENT"
+          },
+          {
+            "id": 1085,
+            "origin_id": 613,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "IMAGE"
+          }
+        ],
+        "extra": {}
+      }
+    ]
+  },
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6303940863128561,
+      "offset": [
+        3476.482849797517,
+        -758.1698421646322
+      ]
+    },
+    "frontendVersion": "1.45.19"
+  },
+  "version": 0.4
+}

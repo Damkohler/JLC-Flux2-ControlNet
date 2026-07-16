@@ -339,7 +339,7 @@ class JLCFlux2ReferenceImageOrchestrator:
         "diagnostics_json",
     )
     FUNCTION = "apply"
-    CATEGORY = "JLC/Flux2/Reference"
+    CATEGORY = "Flux2 Conditioning"
     DESCRIPTION = (
         "Stable native FLUX.2 multi-reference orchestrator. Enabled images are "
         "VAE-encoded or loaded from the JLC CPU reference-latent cache, then "

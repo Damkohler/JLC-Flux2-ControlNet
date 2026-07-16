@@ -85,7 +85,7 @@ class JLCFlux2ControlNetLoader:
     RETURN_TYPES = ("JLC_FLUX2_CONTROLNET",)
     RETURN_NAMES = ("controlnet",)
     FUNCTION = "load_controlnet"
-    CATEGORY = "JLC/ControlNet/Flux2"
+    CATEGORY = "Flux2 Controlnet"
 
     def load_controlnet(self, controlnet_name):
         checkpoint_path = folder_paths.get_full_path("controlnet", controlnet_name)

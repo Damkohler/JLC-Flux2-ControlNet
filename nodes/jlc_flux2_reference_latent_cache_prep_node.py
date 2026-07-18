@@ -153,28 +153,28 @@ def _safe_reference_image(image: torch.Tensor) -> torch.Tensor:
 
 def _iter_slots(
     slot_count: int,
-    image_1: torch.Tensor,
-    image_2: Optional[torch.Tensor],
-    image_3: Optional[torch.Tensor],
-    image_4: Optional[torch.Tensor],
-    image_5: Optional[torch.Tensor],
-    image_6: Optional[torch.Tensor],
-    image_7: Optional[torch.Tensor],
-    image_8: Optional[torch.Tensor],
-    image_9: Optional[torch.Tensor],
-    image_10: Optional[torch.Tensor],
+    reference_image_1: torch.Tensor,
+    reference_image_2: Optional[torch.Tensor],
+    reference_image_3: Optional[torch.Tensor],
+    reference_image_4: Optional[torch.Tensor],
+    reference_image_5: Optional[torch.Tensor],
+    reference_image_6: Optional[torch.Tensor],
+    reference_image_7: Optional[torch.Tensor],
+    reference_image_8: Optional[torch.Tensor],
+    reference_image_9: Optional[torch.Tensor],
+    reference_image_10: Optional[torch.Tensor],
 ) -> Iterable[tuple[int, torch.Tensor]]:
     images = (
-        image_1,
-        image_2,
-        image_3,
-        image_4,
-        image_5,
-        image_6,
-        image_7,
-        image_8,
-        image_9,
-        image_10,
+        reference_image_1,
+        reference_image_2,
+        reference_image_3,
+        reference_image_4,
+        reference_image_5,
+        reference_image_6,
+        reference_image_7,
+        reference_image_8,
+        reference_image_9,
+        reference_image_10,
     )
     active = max(1, min(_MAX_REFERENCE_SLOTS, int(slot_count)))
     for index, image in enumerate(images[:active], start=1):
@@ -190,10 +190,10 @@ class JLCFlux2ReferenceLatentCachePrep:
     path or the inference path should run.
     """
 
-    CATEGORY = "Flux2 ControlNet/Utilities"
+    CATEGORY = "Flux2 Conditioning/Utilities"
     FUNCTION = "prepare"
     RETURN_TYPES = ("IMAGE", "BOOLEAN", "STRING")
-    RETURN_NAMES = ("image_1", "cache_set", "cache_report")
+    RETURN_NAMES = ("reference_image_1", "cache_set", "cache_report")
     DESCRIPTION = (
         "Pre-warms the method-agnostic CPU cache for reusable FLUX.2 "
         "reference-image VAE latents without executing the inference branch."
@@ -204,7 +204,7 @@ class JLCFlux2ReferenceLatentCachePrep:
         return {
             "required": {
                 "vae": ("VAE",),
-                "image_1": ("IMAGE",),
+                "reference_image_1": ("IMAGE",),
                 "slot_count": (
                     "INT",
                     {
@@ -218,15 +218,15 @@ class JLCFlux2ReferenceLatentCachePrep:
                 "diagnostics": ("BOOLEAN", {"default": True}),
             },
             "optional": {
-                "image_2": ("IMAGE",),
-                "image_3": ("IMAGE",),
-                "image_4": ("IMAGE",),
-                "image_5": ("IMAGE",),
-                "image_6": ("IMAGE",),
-                "image_7": ("IMAGE",),
-                "image_8": ("IMAGE",),
-                "image_9": ("IMAGE",),
-                "image_10": ("IMAGE",),
+                "reference_image_2": ("IMAGE",),
+                "reference_image_3": ("IMAGE",),
+                "reference_image_4": ("IMAGE",),
+                "reference_image_5": ("IMAGE",),
+                "reference_image_6": ("IMAGE",),
+                "reference_image_7": ("IMAGE",),
+                "reference_image_8": ("IMAGE",),
+                "reference_image_9": ("IMAGE",),
+                "reference_image_10": ("IMAGE",),
             },
         }
 
@@ -236,20 +236,20 @@ class JLCFlux2ReferenceLatentCachePrep:
 
     def prepare(
         self,
-        image_1,
         vae,
+        reference_image_1,
         slot_count=2,
         clear_before_prepare=False,
         diagnostics=True,
-        image_2=None,
-        image_3=None,
-        image_4=None,
-        image_5=None,
-        image_6=None,
-        image_7=None,
-        image_8=None,
-        image_9=None,
-        image_10=None,
+        reference_image_2=None,
+        reference_image_3=None,
+        reference_image_4=None,
+        reference_image_5=None,
+        reference_image_6=None,
+        reference_image_7=None,
+        reference_image_8=None,
+        reference_image_9=None,
+        reference_image_10=None,
     ):
         if clear_before_prepare:
             clear_reference_latent_cache(diagnostics=bool(diagnostics))
@@ -263,7 +263,7 @@ class JLCFlux2ReferenceLatentCachePrep:
             report = "JLC Flux2 reference-latent cache is disabled or has zero capacity; prep skipped."
             if diagnostics:
                 logging.info("%s %s", PROJECT_LOG_PREFIX, report)
-            return (image_1, False, report)
+            return (reference_image_1, False, report)
 
         prepared = 0
         hits = 0
@@ -273,16 +273,16 @@ class JLCFlux2ReferenceLatentCachePrep:
 
         for slot_index, image in _iter_slots(
             slot_count,
-            image_1,
-            image_2,
-            image_3,
-            image_4,
-            image_5,
-            image_6,
-            image_7,
-            image_8,
-            image_9,
-            image_10,
+            reference_image_1,
+            reference_image_2,
+            reference_image_3,
+            reference_image_4,
+            reference_image_5,
+            reference_image_6,
+            reference_image_7,
+            reference_image_8,
+            reference_image_9,
+            reference_image_10,
         ):
             final_image = _safe_reference_image(image)
             target_height = int(final_image.shape[1])
@@ -353,4 +353,4 @@ class JLCFlux2ReferenceLatentCachePrep:
         if diagnostics:
             logging.info("%s %s", PROJECT_LOG_PREFIX, report)
         cache_set = prepared > 0 and skipped == 0
-        return (image_1, bool(cache_set), report)
+        return (reference_image_1, bool(cache_set), report)

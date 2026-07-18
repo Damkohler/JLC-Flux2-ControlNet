@@ -382,6 +382,21 @@ def _build_children(
 
     return children
 
+def _control_image_outputs(
+    slot_count,
+    control_image_1,
+    control_image_2=None,
+    control_image_3=None,
+    control_image_4=None,
+):
+    count = _coerce_slot_count(slot_count)
+    return (
+        control_image_1 if count >= 1 else None,
+        control_image_2 if count >= 2 else None,
+        control_image_3 if count >= 3 else None,
+        control_image_4 if count >= 4 else None,
+    )
+
 
 class JLCFlux2ControlNetOrchestrator:
     """Apply one to four detached branches from one shared side model."""
@@ -390,10 +405,24 @@ class JLCFlux2ControlNetOrchestrator:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "conditioning": ("CONDITIONING",),
                 "controlnet": ("JLC_FLUX2_CONTROLNET",),
+                "conditioning": ("CONDITIONING",),
                 "vae": ("VAE",),
                 "control_image_1": ("IMAGE",),
+                "slot_count": (
+                    "INT",
+                    {
+                        "default": MAX_CONTROL_SLOTS,
+                        "min": 1,
+                        "max": MAX_CONTROL_SLOTS,
+                        "step": 1,
+                        "tooltip": (
+                            "Number of exposed and active ControlNet slots. "
+                            "Slots above this count are ignored by the backend "
+                            "even if stale workflow data remains connected."
+                        ),
+                    },
+                ),
                 "strength_1": (
                     "FLOAT",
                     {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
@@ -448,25 +477,18 @@ class JLCFlux2ControlNetOrchestrator:
                     "FLOAT",
                     {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
                 ),
-                "slot_count": (
-                    "INT",
-                    {
-                        "default": MAX_CONTROL_SLOTS,
-                        "min": 1,
-                        "max": MAX_CONTROL_SLOTS,
-                        "step": 1,
-                        "tooltip": (
-                            "Number of exposed and active ControlNet slots. "
-                            "Slots above this count are ignored by the backend "
-                            "even if stale workflow data remains connected."
-                        ),
-                    },
-                ),
             },
         }
 
-    RETURN_TYPES = ("CONDITIONING",)
-    RETURN_NAMES = ("conditioning",)
+    RETURN_TYPES = ("CONDITIONING", "VAE", "IMAGE", "IMAGE", "IMAGE", "IMAGE")
+    RETURN_NAMES = (
+        "conditioning",
+        "vae",
+        "control_image_1",
+        "control_image_2",
+        "control_image_3",
+        "control_image_4",
+    )
     FUNCTION = "orchestrate"
     CATEGORY = "Flux2 Controlnet"
 
@@ -537,7 +559,17 @@ class JLCFlux2ControlNetOrchestrator:
             metadata_copy["control_apply_to_uncond"] = False
             output.append([tensor, metadata_copy])
 
-        return (output,)
+        return (
+            output,
+            vae,
+            *_control_image_outputs(
+                slot_count,
+                control_image_1,
+                control_image_2,
+                control_image_3,
+                control_image_4,
+            ),
+        )
 
 
 def _attach_clean_composed_control(conditioning, composed_control):
@@ -564,11 +596,25 @@ class JLCFlux2ControlNetOrchestratorAdvanced:
     def INPUT_TYPES(cls):
         return {
             "required": {
+                "controlnet": ("JLC_FLUX2_CONTROLNET",),
                 "positive": ("CONDITIONING",),
                 "negative": ("CONDITIONING",),
-                "controlnet": ("JLC_FLUX2_CONTROLNET",),
                 "vae": ("VAE",),
                 "control_image_1": ("IMAGE",),
+                "slot_count": (
+                    "INT",
+                    {
+                        "default": MAX_CONTROL_SLOTS,
+                        "min": 1,
+                        "max": MAX_CONTROL_SLOTS,
+                        "step": 1,
+                        "tooltip": (
+                            "Number of exposed and active ControlNet slots. "
+                            "Slots above this count are ignored by the backend "
+                            "even if stale workflow data remains connected."
+                        ),
+                    },
+                ),
                 "strength_1": (
                     "FLOAT",
                     {"default": 0.5, "min": 0.0, "max": 2.0, "step": 0.01},
@@ -623,25 +669,19 @@ class JLCFlux2ControlNetOrchestratorAdvanced:
                     "FLOAT",
                     {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.001},
                 ),
-                "slot_count": (
-                    "INT",
-                    {
-                        "default": MAX_CONTROL_SLOTS,
-                        "min": 1,
-                        "max": MAX_CONTROL_SLOTS,
-                        "step": 1,
-                        "tooltip": (
-                            "Number of exposed and active ControlNet slots. "
-                            "Slots above this count are ignored by the backend "
-                            "even if stale workflow data remains connected."
-                        ),
-                    },
-                ),
             },
         }
 
-    RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
-    RETURN_NAMES = ("positive", "negative")
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "VAE", "IMAGE", "IMAGE", "IMAGE", "IMAGE")
+    RETURN_NAMES = (
+        "positive",
+        "negative",
+        "vae",
+        "control_image_1",
+        "control_image_2",
+        "control_image_3",
+        "control_image_4",
+    )
     FUNCTION = "orchestrate"
     CATEGORY = "Flux2 Controlnet"
 
@@ -710,4 +750,12 @@ class JLCFlux2ControlNetOrchestratorAdvanced:
         return (
             _attach_clean_composed_control(positive, composed_control),
             _attach_clean_composed_control(negative, composed_control),
+            vae,
+            *_control_image_outputs(
+                slot_count,
+                control_image_1,
+                control_image_2,
+                control_image_3,
+                control_image_4,
+            ),
         )

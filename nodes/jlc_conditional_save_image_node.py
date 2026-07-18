@@ -13,30 +13,41 @@ JLC Conditional Save Image
   - The **JLC Conditional Save Image** node is an execution-gated image output
     sink for mutually exclusive ComfyUI workflow branches.
 
-  - A remote BOOLEAN control selects whether this node is active. The IMAGE
-    input is declared lazy and is requested only when the BOOLEAN value matches
-    the configured `run_when` value.
+  - It is packaged as a practical **companion** to the JLC Flux2 cache-prep
+    nodes. A single BOOLEAN control can select between a cache-preparation
+    branch and a normal inference-image branch, while this node both:
+        • requests only the selected lazy image input
+        • saves only in the configured Boolean state(s)
 
 - Workflow Role
-  - Use one shared BOOLEAN control to select between a cache-preparation branch
-    and a normal inference branch. Configure this node to save when that control
-    is FALSE or TRUE as appropriate for the workflow.
+  - This node replaces the pattern of:
+        • external image Switch
+        • separate conditional save sink
 
-  - When the save condition does not match, the node returns immediately without
-    requesting its IMAGE input. Therefore an inactive sampler, VAE Decode, or
-    other expensive upstream image branch is not pulled into the execution graph
-    merely because this output node is present.
+  - Typical Flux2 cache workflow:
 
-  - This node is intentionally an output node. Its branch safety comes from the
-    lazy IMAGE input and conditional `check_lazy_status` implementation.
+        switch = TRUE  -> request cache-prep / proof branch
+        switch = FALSE -> request final inference image branch
+
+    with:
+        • `image_on_true` connected to the TRUE branch
+        • `image_on_false` connected to the FALSE branch
+        • `save_when="FALSE"` so only the inference image is written
+
+  - When the currently selected branch should not be saved, the node still
+    requests that branch so its side effects can occur, but it returns without
+    writing a PNG.
 
 - Saving Contract
   - Supports the normal ComfyUI output directory, relative subdirectories inside
     it, or an explicit absolute output directory.
 
-  - PNG workflow metadata is preserved unless ComfyUI metadata saving is disabled.
-    An optional caption may be written beside each image using a restricted set
-    of plain-text/data extensions.
+  - PNG workflow metadata is preserved unless ComfyUI metadata saving is
+    disabled.
+
+  - PNG compression is lossless:
+        • 0 = no compression / fastest / largest
+        • 9 = strongest compression / slower / smallest
 
 - Attribution & License
   - Concept and implementation by **J. L. Córdova**
@@ -71,34 +82,17 @@ MANIFEST = {
     "version": JLC_FLUX2_CONTROLNET_VERSION,
     "author": "J. L. Córdova",
     "description": (
-        "Execution-gated PNG output node with a lazy IMAGE input. A remote "
-        "BOOLEAN control decides whether the image branch is requested, allowing "
-        "inactive sampler and VAE Decode branches to remain outside the active "
-        "ComfyUI dependency graph."
+        "Execution-gated PNG output node with two lazy branch-image inputs and "
+        "one shared BOOLEAN selector. Packaged as a companion to the JLC Flux2 "
+        "cache-prep nodes so a single control can choose the active branch "
+        "while only configured Boolean states write PNG files."
     ),
+    "base_package_version": JLC_FLUX2_CONTROLNET_VERSION,
+    "role": "cache_prep_companion",
 }
 
 
-_ALLOWED_CAPTION_EXTENSIONS = {
-    ".txt",
-    ".caption",
-    ".json",
-    ".yaml",
-    ".yml",
-    ".md",
-    ".csv",
-    ".tsv",
-    ".xml",
-    ".log",
-    ".ini",
-    ".toml",
-}
-_RUN_WHEN_VALUES = ("FALSE", "TRUE")
-
-
-def _condition_matches(switch: bool, run_when: str) -> bool:
-    expected = str(run_when).strip().upper() == "TRUE"
-    return bool(switch) == expected
+_SAVE_WHEN_VALUES = ("FALSE", "TRUE", "BOTH", "NONE")
 
 
 def _resolve_output_directory(output_folder: str) -> str:
@@ -118,7 +112,6 @@ def _resolve_output_directory(output_folder: str) -> str:
     if normalized.lower() in {"", ".", "output"}:
         target = output_root
     else:
-        # Treat an optional leading "output/" as referring to the ComfyUI output root.
         if normalized.lower().startswith("output/"):
             normalized = normalized[len("output/") :]
         target = os.path.abspath(os.path.join(output_root, normalized))
@@ -137,28 +130,26 @@ def _resolve_output_directory(output_folder: str) -> str:
     return target
 
 
-def _sanitize_caption_extension(extension: str) -> str:
-    cleaned = os.path.basename(str(extension or ".txt").strip())
-    if not cleaned:
-        cleaned = ".txt"
-    if not cleaned.startswith("."):
-        cleaned = "." + cleaned
-    cleaned = cleaned.lower()
-    if cleaned not in _ALLOWED_CAPTION_EXTENSIONS:
-        allowed = ", ".join(sorted(_ALLOWED_CAPTION_EXTENSIONS))
-        raise ValueError(
-            f"Disallowed caption extension {cleaned!r}. Allowed extensions: {allowed}"
-        )
-    return cleaned
+def _save_is_enabled(switch: bool, save_when: str) -> bool:
+    mode = str(save_when or "FALSE").strip().upper()
+    if mode == "BOTH":
+        return True
+    if mode == "NONE":
+        return False
+    if mode == "TRUE":
+        return bool(switch)
+    if mode == "FALSE":
+        return not bool(switch)
+    raise ValueError(f"Unsupported save_when value: {save_when!r}.")
 
 
 class JLCConditionalSaveImage:
-    """Save images only when a remote Boolean matches the configured branch."""
+    """Save from one selected branch, with saving optionally disabled per state."""
 
     CATEGORY = "Flux2 ControlNet/Utilities"
     FUNCTION = "save_images"
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("saved_path",)
+    RETURN_TYPES = ("IMAGE", "STRING")
+    RETURN_NAMES = ("selected_image", "image_save_path")
     OUTPUT_NODE = True
 
     def __init__(self) -> None:
@@ -169,33 +160,44 @@ class JLCConditionalSaveImage:
     def INPUT_TYPES(cls):
         return {
             "required": {
+                "image_on_true": (
+                    "IMAGE",
+                    {
+                        "lazy": True,
+                        "tooltip": (
+                            "Lazy IMAGE used when switch is TRUE. In Flux2 cache workflows, "
+                            "this is commonly the cache-prep or proof branch."
+                        ),
+                    },
+                ),
+                "image_on_false": (
+                    "IMAGE",
+                    {
+                        "lazy": True,
+                        "tooltip": (
+                            "Lazy IMAGE used when switch is FALSE. In Flux2 cache workflows, "
+                            "this is commonly the final inference image branch."
+                        ),
+                    },
+                ),
                 "switch": (
                     "BOOLEAN",
                     {
                         "default": False,
                         "tooltip": (
-                            "Remote branch-control Boolean. The image input is requested only "
-                            "when this value matches run_when."
+                            "Shared branch selector. Companion to the JLC Flux2 cache-prep "
+                            "nodes: TRUE usually selects cache prep; FALSE usually selects "
+                            "normal inference."
                         ),
                     },
                 ),
-                "run_when": (
-                    _RUN_WHEN_VALUES,
+                "save_when": (
+                    _SAVE_WHEN_VALUES,
                     {
                         "default": "FALSE",
                         "tooltip": (
-                            "Choose which Boolean state activates image saving. For a workflow "
-                            "where TRUE prepares caches and FALSE runs inference, use FALSE."
-                        ),
-                    },
-                ),
-                "images": (
-                    "IMAGE",
-                    {
-                        "lazy": True,
-                        "tooltip": (
-                            "Lazy image branch. It is not requested when switch does not match "
-                            "run_when."
+                            "Which switch states write a PNG. The selected branch is still "
+                            "executed either way, which makes this node a cache-prep companion."
                         ),
                     },
                 ),
@@ -226,23 +228,10 @@ class JLCConditionalSaveImage:
                         "min": 0,
                         "max": 9,
                         "step": 1,
-                        "tooltip": "PNG compression level. Higher values reduce file size but save more slowly.",
-                    },
-                ),
-            },
-            "optional": {
-                "caption": (
-                    "STRING",
-                    {
-                        "forceInput": True,
-                        "tooltip": "Optional text written beside every saved image.",
-                    },
-                ),
-                "caption_file_extension": (
-                    "STRING",
-                    {
-                        "default": ".txt",
-                        "tooltip": "Plain-text/data extension for the optional caption sidecar.",
+                        "tooltip": (
+                            "PNG lossless compression: 0 = none/fastest/largest, "
+                            "9 = strongest/slower/smallest. Does not affect metadata."
+                        ),
                     },
                 ),
             },
@@ -254,36 +243,36 @@ class JLCConditionalSaveImage:
 
     def check_lazy_status(
         self,
-        switch: bool,
-        run_when: str,
-        images: torch.Tensor | None = None,
+        image_on_true: torch.Tensor | None = None,
+        image_on_false: torch.Tensor | None = None,
+        switch: bool = False,
         **kwargs: Any,
     ) -> list[str]:
-        """Request the expensive image dependency only for the active branch."""
+        """Request only the currently selected expensive image dependency."""
 
-        if _condition_matches(switch, run_when) and images is None:
-            return ["images"]
-        return []
+        if bool(switch):
+            return ["image_on_true"] if image_on_true is None else []
+        return ["image_on_false"] if image_on_false is None else []
 
     def save_images(
         self,
+        image_on_true: torch.Tensor | None,
+        image_on_false: torch.Tensor | None,
         switch: bool,
-        run_when: str,
+        save_when: str,
         filename_prefix: str,
         output_folder: str,
         compress_level: int = 4,
-        images: torch.Tensor | None = None,
         prompt: Any = None,
         extra_pnginfo: dict[str, Any] | None = None,
-        caption: str | None = None,
-        caption_file_extension: str = ".txt",
     ) -> tuple[str]:
-        if not _condition_matches(switch, run_when):
-            return ("",)
+        images = image_on_true if bool(switch) else image_on_false
 
         if images is None:
+            selected_name = "image_on_true" if bool(switch) else "image_on_false"
             raise ValueError(
-                "JLC Conditional Save Image is active, but its lazy IMAGE input was not supplied."
+                "JLC Conditional Save Image selected "
+                f"{selected_name}, but that lazy IMAGE input was not supplied."
             )
         if not isinstance(images, torch.Tensor) or images.ndim != 4:
             raise ValueError(
@@ -291,6 +280,9 @@ class JLCConditionalSaveImage:
             )
         if images.shape[0] < 1:
             raise ValueError("JLC Conditional Save Image received an empty image batch.")
+
+        if not _save_is_enabled(bool(switch), save_when):
+            return (images, "")
 
         target_dir = _resolve_output_directory(output_folder)
         filename_prefix = str(filename_prefix or "ComfyUI") + self.prefix_append
@@ -304,10 +296,6 @@ class JLCConditionalSaveImage:
                 height,
             )
         )
-
-        caption_extension = None
-        if caption is not None:
-            caption_extension = _sanitize_caption_extension(caption_file_extension)
 
         last_saved_path = ""
         compression = max(0, min(9, int(compress_level)))
@@ -336,32 +324,6 @@ class JLCConditionalSaveImage:
                 compress_level=compression,
             )
             last_saved_path = png_path
-
-            if caption is not None and caption_extension is not None:
-                caption_path = os.path.join(
-                    full_output_folder,
-                    base_name + caption_extension,
-                )
-                try:
-                    inside_target = (
-                        os.path.commonpath(
-                            (
-                                os.path.abspath(full_output_folder),
-                                os.path.abspath(caption_path),
-                            )
-                        )
-                        == os.path.abspath(full_output_folder)
-                    )
-                except ValueError:
-                    inside_target = False
-                if not inside_target:
-                    raise ValueError(
-                        "Refusing to write caption outside the selected output folder: "
-                        f"{caption_path}"
-                    )
-                with open(caption_path, "w", encoding="utf-8") as handle:
-                    handle.write(str(caption))
-
             counter += 1
 
-        return (last_saved_path,)
+        return (images, last_saved_path)

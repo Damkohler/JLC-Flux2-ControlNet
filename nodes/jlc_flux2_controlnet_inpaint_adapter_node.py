@@ -342,8 +342,8 @@ class JLCFlux2ControlNetInpaintAdapter:
             },
         }
 
-    RETURN_TYPES = ("CONDITIONING",)
-    RETURN_NAMES = ("conditioning",)
+    RETURN_TYPES = ("CONDITIONING", "VAE")
+    RETURN_NAMES = ("conditioning", "vae")
     FUNCTION = "apply_inpaint_context"
     CATEGORY = "Flux2 Controlnet"
 
@@ -364,7 +364,7 @@ class JLCFlux2ControlNetInpaintAdapter:
             upgraded_by_identity={},
             node_name="JLC Flux2 ControlNet In/Out-Paint Adapter",
         )
-        return (output,)
+        return (output, vae)
 
 
 class JLCFlux2ControlNetInpaintAdapterAdvanced:
@@ -383,8 +383,8 @@ class JLCFlux2ControlNetInpaintAdapterAdvanced:
             },
         }
 
-    RETURN_TYPES = ("CONDITIONING", "CONDITIONING")
-    RETURN_NAMES = ("positive", "negative")
+    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "VAE")
+    RETURN_NAMES = ("positive", "negative", "vae")
     FUNCTION = "apply_inpaint_context"
     CATEGORY = "Flux2 Controlnet"
 
@@ -416,4 +416,4 @@ class JLCFlux2ControlNetInpaintAdapterAdvanced:
             upgraded_by_identity=upgraded_by_identity,
             node_name="JLC Flux2 ControlNet In/Out-Paint Adapter Advanced",
         )
-        return (positive_out, negative_out)
+        return (positive_out, negative_out, vae)

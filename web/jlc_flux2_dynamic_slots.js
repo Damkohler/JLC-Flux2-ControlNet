@@ -15,7 +15,7 @@ const UPDATE_BUTTON_LABEL = "Update Visible Slots";
 const NODE_CONFIG = {
     JLCFlux2HintLatentCachePrep: {
         maxSlots: 4,
-        inputPrefix: "image_",
+        inputPrefix: "control_image_",
         inputStartIndex: 1,
         slotWidgets: () => [],
         layoutKey: "__jlc_flux2_hint_cache_prep_layout",
@@ -23,7 +23,7 @@ const NODE_CONFIG = {
     },
     JLCFlux2ReferenceLatentCachePrep: {
         maxSlots: 10,
-        inputPrefix: "image_",
+        inputPrefix: "reference_image_",
         inputStartIndex: 1,
         slotWidgets: () => [],
         layoutKey: "__jlc_flux2_reference_cache_prep_layout",
@@ -33,6 +33,9 @@ const NODE_CONFIG = {
         maxSlots: 10,
         inputPrefix: "reference_image_",
         inputStartIndex: 1,
+        outputPrefix: "reference_image_",
+        outputStartIndex: 1,
+        outputTrailingNames: ["diagnostics_json"],
         slotWidgets: (index) => [`enabled_${index}`],
         layoutKey: "__jlc_flux2_reference_orchestrator_layout",
         installFlag: "__jlc_flux2_reference_orchestrator_installed",
@@ -41,6 +44,9 @@ const NODE_CONFIG = {
         maxSlots: 4,
         inputPrefix: "control_image_",
         inputStartIndex: 1,
+        outputPrefix: "control_image_",
+        outputStartIndex: 1,
+        outputTrailingNames: [],
         slotWidgets: (index) => [
             `strength_${index}`,
             `start_percent_${index}`,
@@ -53,6 +59,9 @@ const NODE_CONFIG = {
         maxSlots: 4,
         inputPrefix: "control_image_",
         inputStartIndex: 1,
+        outputPrefix: "control_image_",
+        outputStartIndex: 1,
+        outputTrailingNames: [],
         slotWidgets: (index) => [
             `strength_${index}`,
             `start_percent_${index}`,
@@ -68,6 +77,10 @@ const JLC_PRIMARY_BUTTON_TEXT = "#FFFFFF";
 
 function slotInputName(index, config) {
     return `${config.inputPrefix}${index}`;
+}
+
+function slotOutputName(index, config) {
+    return `${config.outputPrefix}${index}`;
 }
 
 function getSlotCount(node, config) {
@@ -95,6 +108,52 @@ function removeInputByName(node, name) {
 function ensureInput(node, name, type, options) {
     if (hasInput(node, name)) return;
     node.addInput(name, type, options);
+}
+
+function findOutputIndex(node, name) {
+    return node.outputs?.findIndex((output) => output.name === name) ?? -1;
+}
+
+function hasOutput(node, name) {
+    return findOutputIndex(node, name) >= 0;
+}
+
+function removeOutputByName(node, name) {
+    const index = findOutputIndex(node, name);
+    if (index < 0) return false;
+    node.removeOutput(index);
+    return true;
+}
+
+function syncOutputLinkSlots(node) {
+    if (!node.outputs || !node.graph?.links) return;
+    for (let slot = 0; slot < node.outputs.length; slot++) {
+        for (const linkId of node.outputs[slot].links || []) {
+            const link = node.graph.links[linkId];
+            if (link) link.origin_slot = slot;
+        }
+    }
+}
+
+function firstTrailingOutputIndex(node, config) {
+    for (const name of config.outputTrailingNames || []) {
+        const index = findOutputIndex(node, name);
+        if (index >= 0) return index;
+    }
+    return -1;
+}
+
+function ensureOutput(node, name, type, options, config) {
+    if (hasOutput(node, name)) return;
+    node.addOutput(name, type, options);
+
+    const addedIndex = findOutputIndex(node, name);
+    const beforeIndex = firstTrailingOutputIndex(node, config);
+    if (addedIndex < 0 || beforeIndex < 0 || addedIndex < beforeIndex) return;
+
+    const [output] = node.outputs.splice(addedIndex, 1);
+    node.outputs.splice(beforeIndex, 0, output);
+    syncOutputLinkSlots(node);
 }
 
 function rememberWidgetLayout(widget, config) {
@@ -135,6 +194,21 @@ function rebuildSlotInputs(node, config, count) {
     for (let i = config.inputStartIndex; i <= count; i++) {
         ensureInput(node, slotInputName(i, config), "IMAGE", { shape: 7 });
     }
+}
+
+function rebuildSlotOutputs(node, config, count) {
+    if (!config.outputPrefix) return;
+    if (!node.outputs) node.outputs = [];
+
+    for (let i = config.maxSlots; i > count; i--) {
+        removeOutputByName(node, slotOutputName(i, config));
+    }
+
+    for (let i = config.outputStartIndex ?? 1; i <= count; i++) {
+        ensureOutput(node, slotOutputName(i, config), "IMAGE", { shape: 7 }, config);
+    }
+
+    syncOutputLinkSlots(node);
 }
 
 function updateSlotWidgets(node, config, count) {
@@ -205,6 +279,7 @@ function applyVisibleSlotCount(node, config) {
     const count = getSlotCount(node, config);
 
     rebuildSlotInputs(node, config, count);
+    rebuildSlotOutputs(node, config, count);
     updateSlotWidgets(node, config, count);
 
     const countWidget = node.widgets?.find((w) => w.name === SLOT_COUNT_WIDGET);

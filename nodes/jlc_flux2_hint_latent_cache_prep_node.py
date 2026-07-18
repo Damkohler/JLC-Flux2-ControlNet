@@ -154,12 +154,12 @@ def _validate_target_geometry(width: int, height: int, compression_ratio: int) -
 
 def _iter_slots(
     slot_count: int,
-    image_1: torch.Tensor,
-    image_2: torch.Tensor | None,
-    image_3: torch.Tensor | None,
-    image_4: torch.Tensor | None,
+    control_image_1: torch.Tensor,
+    control_image_2: torch.Tensor | None,
+    control_image_3: torch.Tensor | None,
+    control_image_4: torch.Tensor | None,
 ) -> Iterable[tuple[int, torch.Tensor]]:
-    images = (image_1, image_2, image_3, image_4)
+    images = (control_image_1, control_image_2, control_image_3, control_image_4)
     active = max(1, min(_MAX_HINT_SLOTS, int(slot_count)))
     for index, image in enumerate(images[:active], start=1):
         if image is not None:
@@ -177,14 +177,14 @@ class JLCFlux2HintLatentCachePrep:
     CATEGORY = "Flux2 ControlNet/Utilities"
     FUNCTION = "prepare"
     RETURN_TYPES = ("IMAGE", "BOOLEAN", "STRING")
-    RETURN_NAMES = ("image_1", "cache_set", "cache_report")
+    RETURN_NAMES = ("control_image_1", "cache_set", "cache_report")
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "vae": ("VAE",),
-                "image_1": ("IMAGE",),
+                "control_image_1": ("IMAGE",),
                 "width": (
                     "INT",
                     {
@@ -218,9 +218,9 @@ class JLCFlux2HintLatentCachePrep:
                 "diagnostics": ("BOOLEAN", {"default": True}),
             },
             "optional": {
-                "image_2": ("IMAGE",),
-                "image_3": ("IMAGE",),
-                "image_4": ("IMAGE",),
+                "control_image_2": ("IMAGE",),
+                "control_image_3": ("IMAGE",),
+                "control_image_4": ("IMAGE",),
             },
         }
 
@@ -230,16 +230,16 @@ class JLCFlux2HintLatentCachePrep:
 
     def prepare(
         self,
-        image_1,
         vae,
+        control_image_1,
         width=1024,
         height=1024,
         slot_count=4,
         clear_before_prepare=False,
         diagnostics=True,
-        image_2=None,
-        image_3=None,
-        image_4=None,
+        control_image_2=None,
+        control_image_3=None,
+        control_image_4=None,
     ):
         if clear_before_prepare:
             clear_hint_latent_cache(diagnostics=bool(diagnostics))
@@ -253,7 +253,7 @@ class JLCFlux2HintLatentCachePrep:
             report = "JLC Flux2 hint-latent cache is disabled or has zero capacity; prep skipped."
             if diagnostics:
                 logging.info("%s %s", PROJECT_LOG_PREFIX, report)
-            return (image_1, False, report)
+            return (control_image_1, False, report)
 
         compression_ratio = _FLUX2_CONTROL_COMPRESSION_RATIO * int(
             vae.spacial_compression_encode()
@@ -276,10 +276,10 @@ class JLCFlux2HintLatentCachePrep:
 
         for slot_index, image in _iter_slots(
             slot_count,
-            image_1,
-            image_2,
-            image_3,
-            image_4,
+            control_image_1,
+            control_image_2,
+            control_image_3,
+            control_image_4,
         ):
             control_hint = _image_to_control_hint(image)
             cache_request = make_hint_latent_cache_key(
@@ -360,4 +360,4 @@ class JLCFlux2HintLatentCachePrep:
         if diagnostics:
             logging.info("%s %s", PROJECT_LOG_PREFIX, report)
         cache_set = prepared > 0 and skipped == 0
-        return (image_1, bool(cache_set), report)
+        return (control_image_1, bool(cache_set), report)

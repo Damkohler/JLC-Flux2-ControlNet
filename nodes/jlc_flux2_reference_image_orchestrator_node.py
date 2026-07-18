@@ -227,6 +227,17 @@ def _enabled_value(kwargs: dict[str, Any], index: int) -> bool:
 def _image_value(kwargs: dict[str, Any], index: int) -> Optional[torch.Tensor]:
     return kwargs.get(f"reference_image_{index}")
 
+def _reference_image_outputs(kwargs: dict[str, Any], slot_count: int) -> tuple[Optional[torch.Tensor], ...]:
+    count = max(1, min(MAX_REFERENCE_SLOTS, int(slot_count)))
+    outputs: list[Optional[torch.Tensor]] = []
+    for index in range(1, MAX_REFERENCE_SLOTS + 1):
+        image = _image_value(kwargs, index)
+        if index <= count and _enabled_value(kwargs, index) and image is not None:
+            outputs.append(image)
+        else:
+            outputs.append(None)
+    return tuple(outputs)
+
 
 class JLCFlux2ReferenceImageOrchestrator:
     """Native FLUX.2 multi-reference conditioning with CPU latent caching."""
@@ -331,11 +342,36 @@ class JLCFlux2ReferenceImageOrchestrator:
 
         return {"required": required, "optional": optional}
 
-    RETURN_TYPES = ("CONDITIONING", "CONDITIONING", "IMAGE", "STRING")
+    RETURN_TYPES = (
+        "CONDITIONING",
+        "CONDITIONING",
+        "VAE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "IMAGE",
+        "STRING",
+    )
     RETURN_NAMES = (
         "positive",
         "negative",
-        "first_reference_image",
+        "vae",
+        "reference_image_1",
+        "reference_image_2",
+        "reference_image_3",
+        "reference_image_4",
+        "reference_image_5",
+        "reference_image_6",
+        "reference_image_7",
+        "reference_image_8",
+        "reference_image_9",
+        "reference_image_10",
         "diagnostics_json",
     )
     FUNCTION = "apply"
@@ -594,11 +630,8 @@ class JLCFlux2ReferenceImageOrchestrator:
         return (
             output_positive,
             output_negative,
-            (
-                first_reference_image
-                if first_reference_image is not None
-                else _empty_preview_image()
-            ),
+            vae,
+            *_reference_image_outputs(kwargs, slot_count),
             diagnostics_json,
         )
 

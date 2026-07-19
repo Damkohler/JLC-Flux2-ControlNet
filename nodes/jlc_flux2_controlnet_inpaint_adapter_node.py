@@ -1,18 +1,19 @@
 """
-JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
-------------------------------------------------------
+JLC Flux2 ControlNet In/Out-Paint Adapter - Experimental
+---------------------------------------------------------
 
 - Project and Release Status
-  - This node is part of **JLC Flux2 ControlNet / Non-Recursive ControlNet
-    Release 2.0.0**, developed by **J. L. Córdova**.
+  - This node is part of **JLC Flux2 ControlNet Release 1.0.0**, developed by
+    **J. L. Córdova**.
 
   - The adapter is included as an **Experimental** feature. Its core FLUX.2
     mask-aware conditioning path is operational and has been validated with
-    standalone Apply conditioning, non-recursive Orchestrator composition,
-    OpenPose/DWPose guidance, and native reference-image conditioning.
+    standalone Apply conditioning, flat non-recursive Orchestrator composition,
+    OpenPose/DWPose guidance, native reference-image conditioning, strict
+    image/mask canvas validation, and the shared inpaint-context CPU cache.
 
-  - The node keeps its own experimental revision while reporting the base
-    package version through ``JLC_FLUX2_CONTROLNET_VERSION``.
+  - The node retains its own experimental revision while reporting the package
+    version through ``JLC_FLUX2_CONTROLNET_VERSION``.
 
 - Node Purpose
   - The adapter upgrades an existing JLC Flux2 ControlNet conditioning chain
@@ -26,31 +27,31 @@ JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
         • one packed four-channel inverse keep-mask context
 
   - It does not replace or modify the sampler latent. The validated sampler
-    workflow may continue to use the clean/empty Flux2 latent path.
+    workflow continues to use the clean/empty Flux2 latent path.
 
 - Workflow Placement
   - Standalone Apply path:
 
         text / reference conditioning
         -> JLC Flux2 ControlNet Apply
-        -> JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
+        -> JLC Flux2 ControlNet In/Out-Paint Adapter - Experimental
         -> guider / sampler
 
   - Multi-ControlNet path:
 
         text / reference conditioning
         -> JLC Flux2 ControlNet Orchestrator
-        -> JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
+        -> JLC Flux2 ControlNet In/Out-Paint Adapter - Experimental
         -> guider / sampler
 
 - Single and Composed Control Behavior
   - For a standalone Apply result, the upgraded control remains the
     sampler-visible object and retains its native Flux2 residual-injection hook.
 
-  - For a non-recursive composed control, the adapter attaches one shared
-    inpaint context only to the first active child. Other active children remain
-    ordinary control-only branches, and the composition wrapper retains
-    ownership of the single shared injection hook.
+  - For a composed control, the adapter attaches one shared inpaint context
+    only to the first active child. Other active children remain ordinary
+    control-only branches, and the flat composition wrapper retains ownership
+    of the single shared injection hook.
 
   - No recursive ``previous_controlnet`` chain is created.
 
@@ -69,16 +70,17 @@ JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
   - The packed ControlNet mask lanes use the inverse hard keep-mask, resized
     with nearest-exact sampling and patchified into four 2x2 lanes.
 
+  - IMAGE and MASK must already match each other and the active sampling canvas
+    exactly. Silent spatial resizing is rejected with a clear error.
+
   - The ordinary ControlNet hint remains separate from the edit canvas and
     mask. Reference-image tokens remain supported and receive exact-zero
     260-channel ControlNet padding where required by the runtime sequence.
 
 - Cache and Model-Management Behavior
-  - Prepared inpaint context can be pre-warmed in the shared bounded CPU
-    cache. Runtime falls back to inline preparation on a cache miss.
-
-  - IMAGE and MASK must already match the active sampling canvas exactly.
-    Silent spatial resizing is rejected with a clear error.
+  - Prepared inpaint context can be pre-warmed in the shared bounded CPU cache.
+    Runtime uses the shared entry on a hit and falls back to inline preparation
+    on a miss.
 
   - PyTorch inference tensors are treated as versionless without accessing an
     unavailable autograd version counter.
@@ -89,26 +91,32 @@ JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
 - Canonical Inputs
   - The visible source-image input is named ``image`` and appears above
     ``mask``. No compatibility alias is retained for the earlier experimental
-    ``edit_canvas_image`` name. Recreate or reconnect older experimental nodes.
+    ``edit_canvas_image`` name.
 
 - Experimental Limitations
   - The release deliberately retains the hard-mask contract. Experimental mask
     expansion and feathering were removed after testing produced visible
     mask-shaped gray artifacts.
 
-  - Seed-variable boundary or contour artifacts may still occur. Dense
-    appearance-derived auxiliary controls, excessive strengths, and long
-    activation ranges may overpower prompt, reference, or inpaint behavior.
+  - Seed-variable boundary or contour artifacts may still occur.
 
-  - Continue validating mask geometry, ControlNet modality balance, reference
-    conditioning, batch execution, inpainting/outpainting layouts, and changing
-    ComfyUI model-management behavior.
+  - Only the first active ControlNet child receives the mask-aware inpaint
+    context. Additional dense controls such as depth, luminance, or color are
+    not spatially mask-gated and may preserve or imprint source structure
+    inside editable regions. Use conservative strengths and short ranges.
+
+  - Continue validating mask geometry, modality balance, reference
+    conditioning, batch execution, inpainting/outpainting layouts, and
+    changing ComfyUI model-management behavior.
 
 - Attribution and License
   - Concept and implementation by **J. L. Córdova**, with development
     assistance from **ChatGPT (OpenAI)**.
 
-  - Designed to interoperate with ComfyUI ControlNet and sampler interfaces:
+  - Repository:
+    https://github.com/Damkohler/JLC-Flux2-ControlNet
+
+  - Designed to interoperate with ComfyUI:
     https://github.com/comfyanonymous/ComfyUI
 
   - Copyright (c) 2026 J. L. Córdova
@@ -127,7 +135,7 @@ EXPERIMENTAL_VERSION = "0.4.0"
 
 
 MANIFEST = {
-    "name": "JLC Flux2 ControlNet In/Out-Paint Adapter Experimental",
+    "name": "JLC Flux2 ControlNet In/Out-Paint Adapter - Experimental",
     "version": EXPERIMENTAL_VERSION,
     "author": "J. L. Córdova",
     "description": (
@@ -174,9 +182,10 @@ MANIFEST = {
         "dense_or_high_strength_controls_may_overpower_inpaint_or_reference_guidance",
         "mask_expansion_and_feathering_not_included_due_to_visible_artifacts",
         "image_and_mask_must_exactly_match_the_sampling_canvas",
+        "additional_dense_controlnet_branches_are_not_mask_gated",
     ),
     "status": "experimental",
-    "release_track": "Non-Recursive ControlNet 2.0.0",
+    "release_track": f"JLC Flux2 ControlNet {JLC_FLUX2_CONTROLNET_VERSION}",
     "base_package_version": JLC_FLUX2_CONTROLNET_VERSION,
     "license": "MIT",
 }

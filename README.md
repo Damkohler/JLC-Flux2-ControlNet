@@ -60,6 +60,11 @@ The repository includes Release 1.0.0 reference-image and multi-ControlNet and I
 [Download the PNG workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png) ·
 [Download the JSON workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.json)
 
+[![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)
+
+[Download the PNG workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png) ·
+[Download the JSON workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.json)
+
 [![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)
 
 [Download the PNG workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png) ·

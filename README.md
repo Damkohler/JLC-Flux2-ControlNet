@@ -6,7 +6,7 @@
 
 <p align="center">
   ComfyUI-native FLUX.2 ControlNet with flat multi-ControlNet composition,<br>
-  multi-reference conditioning, optional latent caching, and experimental in/out-paint support.
+  multi-reference conditioning, reusable latent caching, and experimental accelerated in/out-paint support.
 </p>
 
 <p align="center">
@@ -51,27 +51,33 @@ The project provides a conventional single-ControlNet Apply path and a preferred
 
 ---
 
-## Included Workflow
+## Included Workflows
 
-The repository includes Release 1.0.0 reference-image and multi-ControlNet and Inpaint Adapter workflows. The PNG files contain embedded ComfyUI workflow data and can be dragged directly into ComfyUI. The JSON files are provided for standard workflow loading:
+The repository includes Release 1.0.0 reference-image, multi-ControlNet, and experimental In/Out-Paint Adapter workflows. The PNG files contain embedded ComfyUI workflow data and can be dragged directly into ComfyUI. The JSON files are provided for standard workflow loading:
+
+### Basic reference-image and multi-ControlNet workflow
 
 [![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png)](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png)
 
 [Download the PNG workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png) ·
 [Download the JSON workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.json)
 
-[![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)
+### Focused experimental inpainting workflow
+
+[![JLC Flux2 ControlNet experimental inpainting workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)
 
 [Download the PNG workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png) ·
 [Download the JSON workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.json)
 
-[![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)
+### Full reference, multi-ControlNet, inpainting, and cache workflow
+
+[![JLC Flux2 ControlNet reference-image, multi-ControlNet, inpainting, and cache workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)
 
 [Download the PNG workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png) ·
 [Download the JSON workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.json)
 
 > [!NOTE]
-> The package does not include pose, depth, edge, luminance, color, or other image preprocessors. Example workflows may use ComfyUI preprocessors and companion custom nodes that must be installed separately. Users may also choose auxiliary preprocessing and workflow-utility nodes from the companion JLC ComfyUI Nodes package: https://github.com/Damkohler/jlc-comfyui-nodes.git. That package is optional and is not required for the core JLC Flux2 ControlNet nodes to function.
+> The package does not include pose, depth, edge, luminance, color, or other image preprocessors. Example workflows may use ComfyUI preprocessors and companion custom nodes that must be installed separately. Users may also choose auxiliary preprocessing and workflow-utility nodes from the optional companion package [JLC ComfyUI Nodes](https://github.com/Damkohler/jlc-comfyui-nodes). That package is optional and is not required for the core JLC Flux2 ControlNet nodes to function.
 
 ---
 
@@ -132,7 +138,7 @@ The runtime can reuse unchanged ControlNet hint latents, reference-image latents
 
 - **JLC Flux2 ControlNet Latents Cache** for up to four active control images
 - **JLC Flux2 Reference Latents Cache** for up to ten active reference images
-- **JLC Flux2 Inpaint Context Cache** for the static packed keep-mask context and VAE-encoded masked-source latent
+- **JLC Flux2 Inpaint Context Cache - Experimental** for the static packed keep-mask context and VAE-encoded masked-source latent
 - **JLC Conditional Save Image** as the lazy branch selector and output companion
 
 Place the three cache-preparation nodes in the same mutually exclusive setup branch. The Inpaint Context Cache node's `LATENT` input must come from the same **Empty Flux2 Latent** node used by the sampler, not from the sampler output.
@@ -161,7 +167,7 @@ The first active ControlNet branch carries the shared inpaint context. Additiona
 
 ## Experimental Inpaint Context Cache
 
-The **JLC Flux2 Inpaint Context Cache** precomputes and stores the static inpaint context before sampling:
+The **JLC Flux2 Inpaint Context Cache - Experimental** precomputes and stores the static inpaint context before sampling:
 
 - packed four-channel hard keep-mask context
 - VAE-encoded masked-source Flux2 latent
@@ -196,7 +202,7 @@ A third dense auxiliary ControlNet may remain computationally fast while still i
 | **JLC Flux2 Reference Image Orchestrator** | Stable | Encodes and attaches up to ten reference images with optional CPU caching. |
 | **JLC Flux2 ControlNet Latents Cache** | Stable utility | Prewarms reusable ControlNet hint latents for up to four active images. |
 | **JLC Flux2 Reference Latents Cache** | Stable utility | Prewarms reusable reference-image latents for up to ten active images. |
-| **JLC Flux2 Inpaint Context Cache** | **Experimental utility** | Precomputes the packed hard keep-mask context and masked-source Flux2 latent for reuse by the experimental adapter. |
+| **JLC Flux2 Inpaint Context Cache - Experimental** | **Experimental utility** | Precomputes the packed hard keep-mask context and masked-source Flux2 latent for reuse by the experimental adapter. |
 | **JLC Conditional Save Image** | Stable utility | Selects a lazy true/false image branch and conditionally saves its result. |
 | **JLC Flux2 ControlNet Inpaint Adapter - Experimental** | **Experimental** | Adds one shared mask-aware in/out-paint context to the first active branch of an existing JLC control path. |
 | **JLC Flux2 ControlNet Inpaint Adapter Advanced - Experimental** | **Experimental** | Applies the same experimental shared mask-aware context to positive and negative streams. |
@@ -206,6 +212,11 @@ A third dense auxiliary ControlNet may remain computationally fast while still i
 ## Documentation
 
 The detailed Release 1.0.0 documentation is organized from practical usage toward implementation detail.
+
+> [!NOTE]
+> The linked pages are substantive **Release 1.0.0 documentation drafts**. They follow the current implementation and included workflows, but remain under editorial review. The source code and current ComfyUI node interfaces are authoritative for exact behavior.
+
+- [Documentation home](docs/README.md)
 
 ### Getting Started
 
@@ -266,14 +277,22 @@ JLC-Flux2-ControlNet/
 ├── assets/
 │   ├── icons/
 │   └── workflows/
+│       ├── Release_0.1.0/
+│       └── Release_1.0.0/
 ├── docs/
+│   ├── developer/
+│   ├── getting-started/
+│   ├── guides/
+│   ├── legal/
+│   └── nodes/
 ├── jlc_flux2_controlnet/
 ├── nodes/
 ├── web/
 ├── __init__.py
+├── jlc_flux2_controlnet_versions.py
 ├── LICENSE
-├── README.md
-└── 
+├── pyproject.toml
+└── README.md
 ```
 
 ---
@@ -300,7 +319,7 @@ JLC Flux2 ControlNet implements its own ComfyUI-native integration and does not 
 
 Developed by **J. L. Córdova**, with research and implementation assistance from **OpenAI ChatGPT**.
 
-See [THIRD_PARTY_NOTES.md](THIRD_PARTY_NOTES.md) for attribution and licensing notes.
+See [Third-Party Reference Notes](docs/legal/third-party-notes.md) for upstream references, attribution, and licensing notes.
 
 ---
 

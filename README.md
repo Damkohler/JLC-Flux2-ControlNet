@@ -10,13 +10,12 @@
 </p>
 
 <p align="center">
-  <img alt="Release" src="https://img.shields.io/badge/release-v1.0.0-blue">
-  <img alt="ComfyUI custom nodes" src="https://img.shields.io/badge/ComfyUI-custom%20nodes-2f80ed">
-  <img alt="FLUX.2 ControlNet" src="https://img.shields.io/badge/FLUX.2-ControlNet-6f42c1">
-  <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776ab">
-  <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue">
+  <img alt="Release" src="https://img.shields.io/badge/release-v1.0.0-blue.svg">
+  <img alt="ComfyUI custom nodes" src="https://img.shields.io/badge/ComfyUI-custom%20nodes-2f80ed.svg">
+  <img alt="FLUX2 ControlNet" src="https://img.shields.io/badge/FLUX2-ControlNet-6f42c1.svg">
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776ab.svg">
+  <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg">
 </p>
-
 
 ---
 

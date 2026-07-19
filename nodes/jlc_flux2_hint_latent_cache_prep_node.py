@@ -1,5 +1,5 @@
 """
-JLC Flux2 Hint Latent Cache Prep
+JLC Flux2 ControlNet Latents Cache
 --------------------------------
 
 - JLC Flux2 ControlNet
@@ -10,7 +10,7 @@ JLC Flux2 Hint Latent Cache Prep
     https://github.com/Damkohler/JLC-Flux2-ControlNet
 
 - Node Purpose
-  - The **JLC Flux2 Hint Latent Cache Prep** node pre-populates the bounded,
+  - The **JLC Flux2 ControlNet Latents Cache** node pre-populates the bounded,
     process-local CPU cache used for reusable FLUX.2 ControlNet hint latents.
 
   - It performs only the validated hint-preparation path:
@@ -82,7 +82,7 @@ from ..jlc_flux2_controlnet.hint_latent_cache import (
 
 
 MANIFEST = {
-    "name": "JLC Flux2 Hint Latent Cache Prep",
+    "name": "JLC Flux2 ControlNet Latents Cache",
     "version": JLC_FLUX2_CONTROLNET_VERSION,
     "author": "J. L. Córdova",
     "description": (
@@ -174,7 +174,7 @@ class JLCFlux2HintLatentCachePrep:
     path or the inference path should run.
     """
 
-    CATEGORY = "Flux2 ControlNet/Utilities"
+    CATEGORY = "Flux2 Latents Cache/utils"
     FUNCTION = "prepare"
     RETURN_TYPES = ("IMAGE", "BOOLEAN", "STRING")
     RETURN_NAMES = ("control_image_1", "cache_set", "cache_report")

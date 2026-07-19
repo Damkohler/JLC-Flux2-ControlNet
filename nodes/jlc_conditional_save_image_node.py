@@ -146,7 +146,7 @@ def _save_is_enabled(switch: bool, save_when: str) -> bool:
 class JLCConditionalSaveImage:
     """Save from one selected branch, with saving optionally disabled per state."""
 
-    CATEGORY = "Flux2 ControlNet/Utilities"
+    CATEGORY = "Flux2 Latents Cache/utils"
     FUNCTION = "save_images"
     RETURN_TYPES = ("IMAGE", "STRING")
     RETURN_NAMES = ("selected_image", "image_save_path")

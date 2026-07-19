@@ -2,151 +2,116 @@
 JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
 ------------------------------------------------------
 
-- JLC Flux2 ControlNet
-  - This node is part of the **JLC Flux2 ControlNet** custom-node project
-    developed by **J. L. Córdova**.
+- Project and Release Status
+  - This node is part of **JLC Flux2 ControlNet / Non-Recursive ControlNet
+    Release 2.0.0**, developed by **J. L. Córdova**.
 
-  - The project provides a native FLUX.2 ControlNet implementation for
-    ComfyUI, including:
-        • standalone ControlNet Apply workflows
-        • multi-ControlNet orchestration
-        • validated non-recursive residual composition
-        • native reference-image conditioning
-        • reusable hint-latent and reference-latent caches
-        • mask-aware inpainting and outpainting support
+  - The adapter is included as an **Experimental** feature. Its core FLUX.2
+    mask-aware conditioning path is operational and has been validated with
+    standalone Apply conditioning, non-recursive Orchestrator composition,
+    OpenPose/DWPose guidance, and native reference-image conditioning.
+
+  - The node keeps its own experimental revision while reporting the base
+    package version through ``JLC_FLUX2_CONTROLNET_VERSION``.
 
 - Node Purpose
-  - The **JLC Flux2 ControlNet In/Out-Paint Adapter Experimental** converts an
-    existing JLC Flux2 ControlNet conditioning chain into the mask-aware
-    Flux2Fun-style ControlNet contract.
+  - The adapter upgrades an existing JLC Flux2 ControlNet conditioning chain
+    to the FLUX.2-dev Fun ControlNet Union mask-aware 260-channel contract.
 
-  - It augments the selected ControlNet path with:
-        • the edit-canvas image
-        • the user-provided editable-region mask
-        • VAE-encoded masked-source context
-        • the expanded 260-channel mask-aware ControlNet input representation
+  - It combines:
+        • the existing structural ControlNet hint
+        • one source/edit-canvas ``image``
+        • one user-facing editable-region ``mask``
+        • one VAE-encoded hard-masked source-image latent
+        • one packed four-channel inverse keep-mask context
 
-  - The node does not replace the sampler latent path.
+  - It does not replace or modify the sampler latent. The validated sampler
+    workflow may continue to use the clean/empty Flux2 latent path.
 
-    The sampler latent may still be prepared independently with:
-        • VAE Encode (for Inpainting)
-        • another mask-aware latent encoder
-        • an empty latent
-        • a custom latent-preparation workflow
-
-- Supported Workflow Placement
-  - The adapter supports both the standalone Apply path and the composed
-    Orchestrator path.
-
-  - Standalone Apply ordering:
+- Workflow Placement
+  - Standalone Apply path:
 
         text / reference conditioning
         -> JLC Flux2 ControlNet Apply
         -> JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
         -> guider / sampler
 
-  - Multi-ControlNet ordering:
+  - Multi-ControlNet path:
 
         text / reference conditioning
         -> JLC Flux2 ControlNet Orchestrator
         -> JLC Flux2 ControlNet In/Out-Paint Adapter Experimental
         -> guider / sampler
 
-  - When the incoming conditioning contains one ordinary JLC Flux2 ControlNet
-    instance, the adapter preserves that control object's native execution and
-    injection-hook behavior while adding the mask-aware inpaint context.
+- Single and Composed Control Behavior
+  - For a standalone Apply result, the upgraded control remains the
+    sampler-visible object and retains its native Flux2 residual-injection hook.
 
-  - When the incoming conditioning contains a non-recursive composed
-    ControlNet wrapper, the adapter preserves the composition wrapper's shared
-    execution and injection-hook ownership.
+  - For a non-recursive composed control, the adapter attaches one shared
+    inpaint context only to the first active child. Other active children remain
+    ordinary control-only branches, and the composition wrapper retains
+    ownership of the single shared injection hook.
 
-- Single-ControlNet Behavior
-  - For a conditioning chain produced by **JLC Flux2 ControlNet Apply**:
-        • the active ControlNet remains the sampler-visible control object
-        • its native Flux2 residual-injection hook remains active
-        • its strength and timestep range remain unchanged
-        • the edit image and editable-region mask are attached to that control
-        • the control image remains the original structural ControlNet hint
-
-  - This makes the adapter a valid downstream extension of the native Apply
-    workflow rather than requiring the Orchestrator.
-
-- Multi-ControlNet Behavior
-  - For a composed multi-ControlNet object, one shared edit canvas and mask
-    apply to the composition as a whole.
-
-  - The mask-aware context is attached exactly once, to the first active
-    ControlNet child.
-
-  - Remaining children continue as ordinary control-only branches.
-
-  - This prevents the same masked-source context from being independently
-    encoded and injected by every active child, which would otherwise multiply
-    the inpaint contribution during non-recursive residual composition.
-
-  - The composed wrapper continues to:
-        • evaluate each active ControlNet independently
-        • combine weighted residuals linearly
-        • expose one ControlNet-compatible object to the ComfyUI sampler
-        • own one shared Flux2 residual-injection hook
+  - No recursive ``previous_controlnet`` chain is created.
 
 - Mask and Image Contract
-  - User-facing mask convention:
+  - User-facing mask polarity is fixed:
 
-        white / 1.0 = editable or regenerate region
-        black / 0.0 = preserve or retain region
+        white / 1.0 = editable or regenerate
+        black / 0.0 = preserve or retain
 
-  - Before VAE encoding, editable pixels in the source image are replaced with
-    the neutral model-space fill expected by the FLUX.2 mask-aware ControlNet
-    path.
+  - The mask is thresholded at ``>= 0.5`` and remains hard and binary.
 
-  - The mask and edit-canvas image are normalized to the dimensions required
-    by the active Flux2 latent and ControlNet context.
+  - Editable source-image pixels are replaced with pixel-space ``0.5`` before
+    VAE encoding, which maps to neutral model-space zero under ComfyUI's VAE
+    normalization.
 
-  - The ordinary ControlNet hint remains separate from the masked edit canvas:
-        • the hint provides pose, edge, depth, luminance, color, or other
-          structural guidance
-        • the edit canvas and mask provide the source-image preservation and
-          regeneration context
+  - The packed ControlNet mask lanes use the inverse hard keep-mask, resized
+    with nearest-exact sampling and patchified into four 2x2 lanes.
 
-- Execution and Model-Management Scope
-  - The adapter does not load a separate base diffusion model.
+  - The ordinary ControlNet hint remains separate from the edit canvas and
+    mask. Reference-image tokens remain supported and receive exact-zero
+    260-channel ControlNet padding where required by the runtime sequence.
 
-  - It does not replace ComfyUI model loading, offloading, patching, sampler
-    execution, or DynamicVRAM policy.
+- Cache and Model-Management Behavior
+  - Prepared inpaint context can be pre-warmed in the shared bounded CPU
+    cache. Runtime falls back to inline preparation on a cache miss.
 
-  - It preserves the incoming ControlNet strength and activation range.
+  - IMAGE and MASK must already match the active sampling canvas exactly.
+    Silent spatial resizing is rejected with a clear error.
 
-  - It does not build a recursive `previous_controlnet` chain.
+  - PyTorch inference tensors are treated as versionless without accessing an
+    unavailable autograd version counter.
 
-  - It does not duplicate the shared inpaint context across every child of a
-    composed ControlNet.
+  - DynamicVRAM/model-loading state is restored after masked-source VAE
+    encoding. Existing hint-latent and reference-latent caches are unchanged.
 
-  - The node is intended to remain downstream of Apply or Orchestrator and
-    upstream of the guider or sampler.
+- Canonical Inputs
+  - The visible source-image input is named ``image`` and appears above
+    ``mask``. No compatibility alias is retained for the earlier experimental
+    ``edit_canvas_image`` name. Recreate or reconnect older experimental nodes.
 
-- Experimental Status
-  - The mask-aware FLUX.2 input contract and single-context composition policy
-    are implemented and operational, but the node remains marked Experimental
-    while broader validation continues across:
-        • different mask shapes and feathering policies
-        • multiple ControlNet modalities
-        • mixed ControlNet strengths and timestep ranges
-        • reference-image conditioning
-        • batch execution
-        • inpainting and outpainting layouts
-        • changing ComfyUI model-management behavior
+- Experimental Limitations
+  - The release deliberately retains the hard-mask contract. Experimental mask
+    expansion and feathering were removed after testing produced visible
+    mask-shaped gray artifacts.
 
-- Attribution & License
-  - Concept and implementation by **J. L. Córdova**
-    with development assistance from **ChatGPT (OpenAI)**.
+  - Seed-variable boundary or contour artifacts may still occur. Dense
+    appearance-derived auxiliary controls, excessive strengths, and long
+    activation ranges may overpower prompt, reference, or inpaint behavior.
 
-  - Designed to interoperate with the ControlNet and sampler execution
-    interfaces provided by ComfyUI:
+  - Continue validating mask geometry, ControlNet modality balance, reference
+    conditioning, batch execution, inpainting/outpainting layouts, and changing
+    ComfyUI model-management behavior.
+
+- Attribution and License
+  - Concept and implementation by **J. L. Córdova**, with development
+    assistance from **ChatGPT (OpenAI)**.
+
+  - Designed to interoperate with ComfyUI ControlNet and sampler interfaces:
     https://github.com/comfyanonymous/ComfyUI
 
   - Copyright (c) 2026 J. L. Córdova
-
   - Released under the **MIT License**.
 """
 
@@ -158,7 +123,7 @@ from ..jlc_flux2_controlnet.composition import JLCFlux2ComposedControl
 from ..jlc_flux2_controlnet.inpaint_control import JLCFlux2InpaintControl
 
 
-EXPERIMENTAL_VERSION = "0.2.0"
+EXPERIMENTAL_VERSION = "0.4.0"
 
 
 MANIFEST = {
@@ -166,17 +131,14 @@ MANIFEST = {
     "version": EXPERIMENTAL_VERSION,
     "author": "J. L. Córdova",
     "description": (
-        "Downstream FLUX.2 mask-aware ControlNet adapter for both standalone "
-        "JLC Flux2 ControlNet Apply workflows and non-recursive multi-ControlNet "
-        "Orchestrator workflows. The adapter combines an edit-canvas image, an "
-        "editable-region mask, and VAE-encoded masked-source context with the "
-        "existing structural ControlNet hint while preserving the incoming "
-        "ControlNet strength, timestep range, and sampler integration. For a "
-        "single Apply result, the control object's native residual-injection "
-        "hook is preserved. For a composed ControlNet, the shared inpaint "
-        "context is attached exactly once to the first active child while the "
-        "composition wrapper retains ownership of the single shared injection "
-        "hook, preventing duplicate masked-source residuals across branches."
+        "Experimental downstream FLUX.2 mask-aware ControlNet adapter for "
+        "standalone JLC Flux2 ControlNet Apply workflows and validated "
+        "non-recursive multi-ControlNet Orchestrator workflows. It attaches "
+        "one hard binary editable-region mask, one source image, and one "
+        "VAE-encoded neutral-filled masked-source latent to the first active "
+        "ControlNet branch while preserving structural hints, native reference "
+        "conditioning, strength/timestep policy, DynamicVRAM restoration, and "
+        "the clean sampler-latent workflow."
     ),
     "capabilities": (
         "single_controlnet_apply",
@@ -187,20 +149,74 @@ MANIFEST = {
         "shared_inpaint_context",
         "non_recursive_composition",
         "native_flux2_hook_preservation",
+        "reference_image_compatibility",
+        "hard_binary_mask_contract",
+        "inference_tensor_safe_context_cache",
+        "shared_inpaint_context_cpu_cache",
+        "strict_canvas_geometry_validation",
+        "dynamic_vram_restore",
     ),
-    "mask_convention": {
-        "white": "editable_or_regenerate",
-        "black": "preserve_or_keep",
+    "mask_contract": {
+        "user_white": "editable_or_regenerate",
+        "user_black": "preserve_or_keep",
+        "threshold": 0.5,
+        "masked_source_pixel_fill": 0.5,
+        "packed_mask": "inverse_hard_keep_mask_2x2_patchified",
     },
     "workflow_position": (
         "JLC Flux2 ControlNet Apply or Orchestrator",
         "JLC Flux2 ControlNet In/Out-Paint Adapter Experimental",
         "Guider or Sampler",
     ),
+    "canonical_inputs": ("image", "mask"),
+    "known_limitations": (
+        "hard_mask_boundary_artifacts_may_be_seed_variable",
+        "dense_or_high_strength_controls_may_overpower_inpaint_or_reference_guidance",
+        "mask_expansion_and_feathering_not_included_due_to_visible_artifacts",
+        "image_and_mask_must_exactly_match_the_sampling_canvas",
+    ),
     "status": "experimental",
+    "release_track": "Non-Recursive ControlNet 2.0.0",
     "base_package_version": JLC_FLUX2_CONTROLNET_VERSION,
     "license": "MIT",
 }
+
+
+def _validate_image_mask_pair(image, mask, *, node_name: str) -> None:
+    """Fail at node execution when IMAGE and MASK disagree with each other.
+
+    Full target-canvas validation occurs in the inpaint context/cache layer,
+    where the active sampling latent geometry is known.
+    """
+
+    if not hasattr(image, "shape") or len(image.shape) != 4 or image.shape[-1] < 3:
+        raise ValueError(
+            f"{node_name} expected IMAGE in BHWC layout, got {getattr(image, 'shape', None)}."
+        )
+    image_hw = (int(image.shape[1]), int(image.shape[2]))
+
+    if not hasattr(mask, "shape"):
+        raise ValueError(f"{node_name} expected a MASK tensor.")
+    if len(mask.shape) == 2:
+        mask_hw = (int(mask.shape[0]), int(mask.shape[1]))
+    elif len(mask.shape) == 3:
+        mask_hw = (int(mask.shape[-2]), int(mask.shape[-1]))
+    elif len(mask.shape) == 4:
+        if mask.shape[-1] == 1:
+            mask_hw = (int(mask.shape[1]), int(mask.shape[2]))
+        else:
+            mask_hw = (int(mask.shape[-2]), int(mask.shape[-1]))
+    else:
+        raise ValueError(
+            f"{node_name} received unsupported MASK shape {tuple(mask.shape)}."
+        )
+
+    if image_hw != mask_hw:
+        raise ValueError(
+            f"{node_name} requires IMAGE and MASK to have identical spatial "
+            f"dimensions. Received image={image_hw[1]}x{image_hw[0]}, "
+            f"mask={mask_hw[1]}x{mask_hw[0]}."
+        )
 
 
 def _finalize_detached_child(child, diagnostics):
@@ -209,7 +225,7 @@ def _finalize_detached_child(child, diagnostics):
     return child
 
 
-def _as_inpaint_child(control, *, vae, mask, edit_canvas_image, diagnostics):
+def _as_inpaint_child(control, *, vae, mask, image, diagnostics):
     if isinstance(control, JLCFlux2InpaintControl):
         child = control.copy()
     elif isinstance(control, JLCFlux2Control):
@@ -226,7 +242,7 @@ def _as_inpaint_child(control, *, vae, mask, edit_canvas_image, diagnostics):
     child.vae = vae
     child.set_inpaint_conditioning(
         mask=mask,
-        edit_canvas_image=edit_canvas_image,
+        image=image,
     )
     return _finalize_detached_child(child, diagnostics)
 
@@ -249,7 +265,7 @@ def _inpaint_host_index(children) -> int:
     return 0
 
 
-def _upgrade_control_object(control, *, vae, mask, edit_canvas_image, diagnostics):
+def _upgrade_control_object(control, *, vae, mask, image, diagnostics):
     if isinstance(control, JLCFlux2ComposedControl):
         if not control.children:
             raise ValueError(
@@ -263,7 +279,7 @@ def _upgrade_control_object(control, *, vae, mask, edit_canvas_image, diagnostic
                 child,
                 vae=vae,
                 mask=mask,
-                edit_canvas_image=edit_canvas_image,
+                image=image,
                 diagnostics=diagnostics,
             )
             if index == host_index
@@ -280,7 +296,7 @@ def _upgrade_control_object(control, *, vae, mask, edit_canvas_image, diagnostic
             control,
             vae=vae,
             mask=mask,
-            edit_canvas_image=edit_canvas_image,
+            image=image,
             diagnostics=diagnostics,
         )
 
@@ -296,7 +312,7 @@ def _upgrade_conditioning(
     *,
     vae,
     mask,
-    edit_canvas_image,
+    image,
     diagnostics,
     upgraded_by_identity,
     node_name,
@@ -317,7 +333,7 @@ def _upgrade_conditioning(
                 control,
                 vae=vae,
                 mask=mask,
-                edit_canvas_image=edit_canvas_image,
+                image=image,
                 diagnostics=diagnostics,
             )
 
@@ -328,6 +344,7 @@ def _upgrade_conditioning(
 
 
 class JLCFlux2ControlNetInpaintAdapter:
+    EXPERIMENTAL = True
     """Attach one mask-aware context to existing JLC control conditioning."""
 
     @classmethod
@@ -336,8 +353,8 @@ class JLCFlux2ControlNetInpaintAdapter:
             "required": {
                 "conditioning": ("CONDITIONING",),
                 "vae": ("VAE",),
+                "image": ("IMAGE",),
                 "mask": ("MASK",),
-                "edit_canvas_image": ("IMAGE",),
                 "diagnostics": ("BOOLEAN", {"default": True}),
             },
         }
@@ -351,15 +368,18 @@ class JLCFlux2ControlNetInpaintAdapter:
         self,
         conditioning,
         vae,
+        image,
         mask,
-        edit_canvas_image,
         diagnostics,
     ):
+        _validate_image_mask_pair(
+            image, mask, node_name="JLC Flux2 ControlNet In/Out-Paint Adapter"
+        )
         output = _upgrade_conditioning(
             conditioning,
             vae=vae,
             mask=mask,
-            edit_canvas_image=edit_canvas_image,
+            image=image,
             diagnostics=diagnostics,
             upgraded_by_identity={},
             node_name="JLC Flux2 ControlNet In/Out-Paint Adapter",
@@ -368,6 +388,7 @@ class JLCFlux2ControlNetInpaintAdapter:
 
 
 class JLCFlux2ControlNetInpaintAdapterAdvanced:
+    EXPERIMENTAL = True
     """Attach one shared mask-aware context to positive and negative streams."""
 
     @classmethod
@@ -377,8 +398,8 @@ class JLCFlux2ControlNetInpaintAdapterAdvanced:
                 "positive": ("CONDITIONING",),
                 "negative": ("CONDITIONING",),
                 "vae": ("VAE",),
+                "image": ("IMAGE",),
                 "mask": ("MASK",),
-                "edit_canvas_image": ("IMAGE",),
                 "diagnostics": ("BOOLEAN", {"default": True}),
             },
         }
@@ -393,16 +414,19 @@ class JLCFlux2ControlNetInpaintAdapterAdvanced:
         positive,
         negative,
         vae,
+        image,
         mask,
-        edit_canvas_image,
         diagnostics,
     ):
+        _validate_image_mask_pair(
+            image, mask, node_name="JLC Flux2 ControlNet In/Out-Paint Adapter Advanced"
+        )
         upgraded_by_identity = {}
         positive_out = _upgrade_conditioning(
             positive,
             vae=vae,
             mask=mask,
-            edit_canvas_image=edit_canvas_image,
+            image=image,
             diagnostics=diagnostics,
             upgraded_by_identity=upgraded_by_identity,
             node_name="JLC Flux2 ControlNet In/Out-Paint Adapter Advanced",
@@ -411,7 +435,7 @@ class JLCFlux2ControlNetInpaintAdapterAdvanced:
             negative,
             vae=vae,
             mask=mask,
-            edit_canvas_image=edit_canvas_image,
+            image=image,
             diagnostics=diagnostics,
             upgraded_by_identity=upgraded_by_identity,
             node_name="JLC Flux2 ControlNet In/Out-Paint Adapter Advanced",

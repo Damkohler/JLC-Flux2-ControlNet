@@ -1,5 +1,5 @@
 """
-JLC Flux2 Reference Latent Cache Prep
+JLC Flux2 Reference Latents Cache
 -------------------------------------
 
 - JLC Flux2 ControlNet
@@ -10,7 +10,7 @@ JLC Flux2 Reference Latent Cache Prep
     https://github.com/Damkohler/JLC-Flux2-ControlNet
 
 - Node Purpose
-  - The **JLC Flux2 Reference Latent Cache Prep** node pre-populates the
+  - The **JLC Flux2 Reference Latents Cache** node pre-populates the
     bounded, process-local CPU cache used by the JLC Flux2 Reference Image
     Orchestrator.
 
@@ -114,7 +114,7 @@ from ..jlc_flux2_controlnet.reference_latent_cache import (
 REFERENCE_LATENT_CACHE_PREP_VERSION = "1.1.0"
 
 MANIFEST = {
-    "name": "JLC Flux2 Reference Latent Cache Prep",
+    "name": "JLC Flux2 Reference Latents Cache",
     "version": REFERENCE_LATENT_CACHE_PREP_VERSION,
     "author": "J. L. Córdova",
     "description": (
@@ -190,7 +190,7 @@ class JLCFlux2ReferenceLatentCachePrep:
     path or the inference path should run.
     """
 
-    CATEGORY = "Flux2 Conditioning/Utilities"
+    CATEGORY = "Flux2 Latents Cache/utils"
     FUNCTION = "prepare"
     RETURN_TYPES = ("IMAGE", "BOOLEAN", "STRING")
     RETURN_NAMES = ("reference_image_1", "cache_set", "cache_report")

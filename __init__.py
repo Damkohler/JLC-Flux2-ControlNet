@@ -80,6 +80,9 @@ from .nodes.jlc_flux2_hint_latent_cache_prep_node import (
 from .nodes.jlc_flux2_reference_latent_cache_prep_node import (
     JLCFlux2ReferenceLatentCachePrep,
 )
+from .nodes.jlc_flux2_inpaint_context_cache_prep_node import (
+    JLCFlux2InpaintContextCachePrep,
+)
 
 from .nodes.jlc_conditional_save_image_node import (
     JLCConditionalSaveImage,
@@ -106,6 +109,7 @@ NODE_CLASS_MAPPINGS = {
     # Flux2 utility nodes
     "JLCFlux2HintLatentCachePrep": JLCFlux2HintLatentCachePrep,
     "JLCFlux2ReferenceLatentCachePrep": JLCFlux2ReferenceLatentCachePrep,
+    "JLCFlux2InpaintContextCachePrep": JLCFlux2InpaintContextCachePrep,
     "JLCConditionalSaveImage": JLCConditionalSaveImage,
 }
 
@@ -126,12 +130,13 @@ NODE_DISPLAY_NAME_MAPPINGS = {
         "\u2003JLC Flux2 Reference Image Orchestrator"
     ),
 
-    "JLCFlux2ControlNetInpaintAdapter": "\u2003JLC Flux2 ControlNet Inpaint Adapter",
-    "JLCFlux2ControlNetInpaintAdapterAdvanced": "\u2003JLC Flux2 ControlNet Inpaint Adapter Advanced",
+    "JLCFlux2ControlNetInpaintAdapter": "\u2003JLC Flux2 ControlNet Inpaint Adapter - Experimental",
+    "JLCFlux2ControlNetInpaintAdapterAdvanced": "\u2003JLC Flux2 ControlNet Inpaint Adapter Advanced - Experimental",
 
     # Flux2 utility nodes
-    "JLCFlux2HintLatentCachePrep": "\u2003JLC Flux2 Hint Latent Cache Prep",
-    "JLCFlux2ReferenceLatentCachePrep": "\u2003JLC Flux2 Reference Latent Cache Prep",
+    "JLCFlux2HintLatentCachePrep": "\u2003JLC Flux2 ControlNet Latents Cache",
+    "JLCFlux2ReferenceLatentCachePrep": "\u2003JLC Flux2 Reference Latents Cache",
+    "JLCFlux2InpaintContextCachePrep": "\u2003JLC Flux2 Inpaint Context Cache - Experimental",
     "JLCConditionalSaveImage": "\u2003JLC Conditional Save Image",
 }
 

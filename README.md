@@ -12,28 +12,11 @@
 <p align="center">
   <img alt="Release" src="https://img.shields.io/badge/release-v1.0.0-blue">
   <img alt="ComfyUI custom nodes" src="https://img.shields.io/badge/ComfyUI-custom%20nodes-2f80ed">
+  <img alt="FLUX.2 ControlNet" src="https://img.shields.io/badge/FLUX.2-ControlNet-6f42c1">
   <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776ab">
-  <img alt="Experimental in/out-paint adapter" src="https://img.shields.io/badge/in%2Fout--paint-experimental-orange">
   <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue">
 </p>
-<p align="center">
-  <img src="assets/icons/jlc-comfyui-nodes_Logo-0512.png" alt="JLC ComfyUI Nodes logo" width="180">
-</p>
 
-<h1 align="center">JLC Flux2 ControlNet for ComfyUI</h1>
-
-<p align="center">
-  ComfyUI-native FLUX.2 ControlNet with flat multi-ControlNet composition,<br>
-  multi-reference conditioning, reusable latent caching, and experimental accelerated in/out-paint support.
-</p>
-
-<p align="center">
-  <img alt="Release" src="https://img.shields.io/badge/release-v1.0.0-blue">
-  <img alt="ComfyUI custom nodes" src="https://img.shields.io/badge/ComfyUI-custom%20nodes-2f80ed">
-  <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776ab">
-  <img alt="Experimental in/out-paint adapter" src="https://img.shields.io/badge/in%2Fout--paint-experimental-orange">
-  <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue">
-</p>
 
 ---
 

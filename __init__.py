@@ -83,6 +83,9 @@ from .nodes.jlc_flux2_reference_latent_cache_prep_node import (
 from .nodes.jlc_flux2_inpaint_context_cache_prep_node import (
     JLCFlux2InpaintContextCachePrep,
 )
+from .nodes.jlc_flux2_conditioning_cache_prep_node import (
+    JLCFlux2ConditioningCachePrep,
+)
 
 from .nodes.jlc_conditional_save_image_node import (
     JLCConditionalSaveImage,
@@ -110,6 +113,7 @@ NODE_CLASS_MAPPINGS = {
     "JLCFlux2HintLatentCachePrep": JLCFlux2HintLatentCachePrep,
     "JLCFlux2ReferenceLatentCachePrep": JLCFlux2ReferenceLatentCachePrep,
     "JLCFlux2InpaintContextCachePrep": JLCFlux2InpaintContextCachePrep,
+    "JLCFlux2ConditioningCachePrep": JLCFlux2ConditioningCachePrep,
     "JLCConditionalSaveImage": JLCConditionalSaveImage,
 }
 
@@ -137,6 +141,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "JLCFlux2HintLatentCachePrep": "\u2003JLC Flux2 ControlNet Latents Cache",
     "JLCFlux2ReferenceLatentCachePrep": "\u2003JLC Flux2 Reference Latents Cache",
     "JLCFlux2InpaintContextCachePrep": "\u2003JLC Flux2 Inpaint Context Cache - Experimental",
+    "JLCFlux2ConditioningCachePrep": "\u2003JLC Flux2 Conditioning Cache Prep",
     "JLCConditionalSaveImage": "\u2003JLC Conditional Save Image",
 }
 

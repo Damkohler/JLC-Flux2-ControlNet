@@ -1,6 +1,6 @@
 [project]
 name = "jlc-flux2-controlnet"
-version = "1.0.0"
+version = "1.0.1"
 description = "A ComfyUI-native FLUX.2 ControlNet toolkit for the FLUX.2-dev Fun ControlNet Union checkpoint. It provides single-ControlNet Apply nodes, flat non-recursive one-to-four-branch orchestration with independent strength and timestep ranges, reference-image conditioning, hint and reference latent caching, and an experimental mask-aware in/out-paint adapter while preserving ComfyUI's native FLUX.2 sampler and model-management lifecycle."
 authors = [
     { name = "J. L. Córdova", email = "jose.l.cordova@gmail.com" }

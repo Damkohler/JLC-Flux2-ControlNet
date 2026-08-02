@@ -58,31 +58,31 @@ The repository includes Release 1.0.1 reference-image, multi-ControlNet, experim
 
 ### Basic reference-image and multi-ControlNet workflow
 
-[![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png)](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png)
+[![JLC Flux2 ControlNet basic workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_BASIC.png)](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_BASIC.png)
 
-[Download the PNG workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.png) ·
-[Download the JSON workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_BASIC_01.json)
+[Download the PNG workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_BASIC.png) ·
+[Download the JSON workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_BASIC.json)
 
 ### Focused experimental inpainting workflow
 
-[![JLC Flux2 ControlNet experimental inpainting workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png)
+[![JLC Flux2 ControlNet experimental inpainting workflow](assets/workflows/Release_1.0.1/jlc_Flux2_Inpainting_workflow.png)](assets/workflows/Release_1.0.1/jlc_Flux2_Inpainting_workflow.png)
 
-[Download the PNG workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.png) ·
-[Download the JSON workflow](assets/workflows/Release_1.0.0/jlc_Flux2_ControlNet_with_Inpainting_workflow.json)
+[Download the PNG workflow](assets/workflows/Release_1.0.1/jlc_Flux2_Inpainting_workflow.png) ·
+[Download the JSON workflow](assets/workflows/Release_1.0.1/jlc_Flux2_Inpainting_workflow.json)
 
 ### Full reference, multi-ControlNet, inpainting, and cache workflow with original cache preparation nodes
 
-[![JLC Flux2 ControlNet reference-image, multi-ControlNet, inpainting, and cache workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png)
+[![JLC Flux2 ControlNet reference-image, multi-ControlNet, inpainting, and cache workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_Inpaint_workflow.png)](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_Inpaint_workflow.png)
 
-[Download the PNG workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.png) ·
-[Download the JSON workflow](assets/workflows/Release_1.0.0/Flux2_ControlNet_RefImages_Inpaint_workflow.json)
+[Download the PNG workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_Inpaint_workflow.png) ·
+[Download the JSON workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_RefImages_Inpaint_workflow.json)
 
 ### Comprehensive workflow, making full use of the new ecosystem and the new JLC Flux2 Conditioning Cache Prep node
 
-[![JLC Flux2 ControlNet reference-image, multi-ControlNet, inpainting, and cache workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_Cache_Wiring.png)](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_Cache_Wiring.png)
+[![JLC Flux2 ControlNet reference-image, multi-ControlNet, inpainting, and cache workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_All_In_One.png)](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_All_In_One.png)
 
-[Download the PNG workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_Cache_Wiring.png) ·
-[Download the JSON workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_Cache_Wiring.json)
+[Download the PNG workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_All_In_One.png) ·
+[Download the JSON workflow](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_All_In_One.json)
 
 ### Cache wiring snapshot
 
@@ -91,7 +91,7 @@ The cache-preparation branch is contained inside a subgraph and becomes visible 
 [![JLC Flux2 ControlNet cache wiring snapshot](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_Cache_Wiring.jpg)](assets/workflows/Release_1.0.1/jlc_Flux2_ControlNet_Cache_Wiring.jpg)
 
 > [!NOTE]
-> This JPG is a static wiring snapshot only and is not a standalone workflow file. The editable ComfyUI workflow data is embedded only in the full workflow PNG provided above.
+> This cache wiring image is a static snapshot only and is not a standalone workflow file. The editable ComfyUI workflow data is embedded only in the full workflow PNG provided above.
 
 > [!NOTE]
 > The package does not include pose, depth, edge, luminance, color, or other image preprocessors. Example workflows may use ComfyUI preprocessors and companion custom nodes that must be installed separately. Users may also choose auxiliary preprocessing and workflow-utility nodes from the optional companion package [JLC ComfyUI Nodes](https://github.com/Damkohler/jlc-comfyui-nodes). That package is optional and is not required for the core JLC Flux2 ControlNet nodes to function.

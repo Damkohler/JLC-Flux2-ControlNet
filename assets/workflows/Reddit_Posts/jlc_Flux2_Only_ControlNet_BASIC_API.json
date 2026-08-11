@@ -1,0 +1,455 @@
+{
+  "625": {
+    "inputs": {
+      "controlnet_name": "FLUX.2-dev-Fun-Controlnet-Union-2602.safetensors"
+    },
+    "class_type": "JLCFlux2ControlNetLoader",
+    "_meta": {
+      "title": " JLC Flux2 ControlNet Loader"
+    }
+  },
+  "638": {
+    "inputs": {
+      "images": [
+        "867",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "650": {
+    "inputs": {
+      "slot_count": 3,
+      "strength_1": 0.01,
+      "start_percent_1": 0,
+      "end_percent_1": 1,
+      "diagnostics": false,
+      "strength_2": 0.5,
+      "start_percent_2": 0,
+      "end_percent_2": 1,
+      "strength_3": 0.1,
+      "start_percent_3": 0,
+      "end_percent_3": 1,
+      "strength_4": 0.5,
+      "start_percent_4": 0,
+      "end_percent_4": 1,
+      "Update Visible Slots": null,
+      "controlnet": [
+        "625",
+        0
+      ],
+      "conditioning": [
+        "889",
+        0
+      ],
+      "vae": [
+        "885",
+        0
+      ],
+      "control_image_1": [
+        "899",
+        0
+      ],
+      "control_image_2": [
+        "899",
+        1
+      ],
+      "control_image_3": [
+        "899",
+        2
+      ]
+    },
+    "class_type": "JLCFlux2ControlNetOrchestrator",
+    "_meta": {
+      "title": " JLC Flux2 ControlNet Orchestrator"
+    }
+  },
+  "867": {
+    "inputs": {
+      "samples": [
+        "917:915",
+        0
+      ],
+      "vae": [
+        "650",
+        1
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "878": {
+    "inputs": {
+      "unet_name": "flux.2\\flux2_dev_fp8mixed.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "879": {
+    "inputs": {
+      "clip_name": "mistral_3_small_flux2_fp8.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "884": {
+    "inputs": {
+      "slot_count": 1,
+      "lora_01": "01-Flux.2-Favs\\Flux_2-Turbo-LoRA_comfyui.safetensors",
+      "strength_01": 1,
+      "lora_02": "None",
+      "strength_02": 0,
+      "lora_03": "None",
+      "strength_03": 0,
+      "lora_04": "None",
+      "strength_04": 0,
+      "lora_05": "None",
+      "strength_05": 0,
+      "lora_06": "None",
+      "strength_06": 0,
+      "lora_07": "None",
+      "strength_07": 0,
+      "lora_08": "None",
+      "strength_08": 0,
+      "lora_09": "None",
+      "strength_09": 0,
+      "lora_10": "None",
+      "strength_10": 0,
+      "Update Visible Slots": null,
+      "model": [
+        "878",
+        0
+      ]
+    },
+    "class_type": "JLC_DynamicLoraLoaderModelOnly",
+    "_meta": {
+      "title": " JLC LoRA Loader - Multi Model"
+    }
+  },
+  "885": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "887": {
+    "inputs": {
+      "noise_seed": 1000
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "889": {
+    "inputs": {
+      "guidance": 2,
+      "conditioning": [
+        "891",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "891": {
+    "inputs": {
+      "text": "A beautiful ballerina with emerald-green eyes and blonde light brown eyebrows.\n\nShe is captured mid-performance in a striking attitude en pointe with a dramatic cambré backbend. Balances flawlessly on the absolute tip of her vertical right pointe shoe, her right leg locked straight. Her left leg is lifted in front of her torso, bent at a sharp 90-degree angle at the knee, with her thigh turned out and her strongly pointed foot resting flat against the inside of her right supporting knee. Her spine curves into a deep, sweeping arch, sending her chest upward while her head tilts back to gaze toward the ceiling. Her right arm extends directly overhead in a fluid classical line, while her left arm trails softly downward and back, completing a breathtaking silhouette of balance and flexibility.\n\nShe has expressive eyes, soft features, and beautiful proportions. Her face is a striking heart-shaped face, featuring a high, wide forehead that tapers elegantly into a smooth, seamless jawline and a delicate, completely smooth, unbroken soft rounded chin. Her visage is anchored by high, prominent cheekbones that create natural, photogenic contours, accented by large, expressive, wide-set almond eyes sitting beneath a well-defined brow ridge. Every feature balances feminine softness with strong, camera-ready bone definition, ensuring the lower face remains perfectly continuous, flawless, and uniformly smooth, capturing light and shadows with stunning, cinematic precision.\n\nShe has long, voluminous golden blonde hair styled in a deep side part. The hair has dramatic lift and volume at the root, sweeping elegantly over the crown and cascading into soft, glossy, flowing waves past her shoulders. The strands are perfectly defined with a silky, high-shine texture. and warm honey blonde highlights. Her hair is a solid, natural-born blonde with a seamless, monochromatic light golden hue that extends perfectly from the scalp down to the tips, completely devoid of dark root regrowth or shadow roots. Her eyebrows match seamlessly, featuring a matching light ash-blonde shade that looks entirely natural and authentic, avoiding any stark contrast.\n\nHer body is fit but retains a pronounced ultra feminine hourglass shape with firm round breasts, a narrow waist and wide hips. \n\nShe is wearing a vintage 1950s-style light pink babydoll nightgown made of translucent, gauzy, see-through chiffon flares loosely to the upper thigh, featuring delicate ruffled lace trim along the hemline and matching pink satin ribbon bows at the straps. She wears small polished silver hoop earrings, a matching silver navel piercing, a single thin silver wrist bracelet, and a single silver upper arm band. Elegant silver open-toed high heel sandals with delicate straps frame her slightly wide feet, showing off a fresh coat of matching pink polish on her toenails.\n\nShe is in a vast dark empty soundstage, nothing in the background, except for spectaculart multicolor bokkeh or many hues, including blues, purples, pinks, reds, and soft yellows.\n\nStyle: 1950s classic Playboy pin-up illustration by Alberto Vargas, hyper-smooth airbrush technique, flawless porcelain skin rendering, rich jewel-toned background wash, clean watercolor accents, crisp stylized linework, semi-gloss vintage magazine print texture, vibrant mid-century glamour aesthetic.",
+      "clip": [
+        "879",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "893": {
+    "inputs": {
+      "mode": false,
+      "a": [
+        "894",
+        2
+      ],
+      "b": [
+        "894",
+        3
+      ]
+    },
+    "class_type": "ImpactMinMax",
+    "_meta": {
+      "title": "ImpactMinMax"
+    }
+  },
+  "894": {
+    "inputs": {
+      "image": "ballerina_02b.jpg",
+      "resize_by": "scale longer dimension",
+      "multiplier": 1,
+      "longer_size": 1792,
+      "shorter_size": 1024,
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16
+    },
+    "class_type": "JLC_LoadAndResizeImage",
+    "_meta": {
+      "title": "JLC Load & Resize Image"
+    }
+  },
+  "895": {
+    "inputs": {
+      "sharpen_radius": 1,
+      "sigma": 1,
+      "alpha": 1,
+      "image": [
+        "894",
+        0
+      ]
+    },
+    "class_type": "ImageSharpen",
+    "_meta": {
+      "title": "Sharpen Image"
+    }
+  },
+  "897": {
+    "inputs": {
+      "slot_count": 2,
+      "resolution": 4096,
+      "preprocessor_01": "DepthAnythingPreprocessor",
+      "preprocessor_02": "ColorPreprocessor",
+      "preprocessor_03": "AnyLineArtPreprocessor_aux",
+      "preprocessor_04": "DISABLED",
+      "preprocessor_05": "DISABLED",
+      "preprocessor_06": "DISABLED",
+      "preprocessor_07": "DISABLED",
+      "preprocessor_08": "DISABLED",
+      "preprocessor_09": "DISABLED",
+      "preprocessor_10": "DISABLED",
+      "Update Visible Slots": null,
+      "image": [
+        "895",
+        0
+      ]
+    },
+    "class_type": "JLC_DynamicAuxPreprocessorWrapper",
+    "_meta": {
+      "title": " JLC Dynamic Aux Preprocessor Wrapper"
+    }
+  },
+  "898": {
+    "inputs": {
+      "detect_hand": "enable",
+      "detect_body": "enable",
+      "detect_face": "enable",
+      "resolution": 4096,
+      "bbox_detector": "yolox_l.torchscript.pt",
+      "pose_estimator": "dw-ll_ucoco_384_bs5.torchscript.pt",
+      "scale_stick_for_xinsr_cn": "enable",
+      "image": [
+        "895",
+        0
+      ]
+    },
+    "class_type": "DWPreprocessor",
+    "_meta": {
+      "title": "DWPose Estimator"
+    }
+  },
+  "899": {
+    "inputs": {
+      "slot_count": 3,
+      "resize_by": "scale shorter dimension",
+      "multiplier": 1,
+      "longer_size": 1024,
+      "shorter_size": [
+        "893",
+        0
+      ],
+      "width": 1024,
+      "height": 1024,
+      "megapixels": 1,
+      "scale_method": "area",
+      "divisible_by": 16,
+      "Update Visible Slots": null,
+      "image_1": [
+        "898",
+        0
+      ],
+      "image_2": [
+        "897",
+        0
+      ],
+      "image_3": [
+        "897",
+        1
+      ]
+    },
+    "class_type": "JLC_ResizeImages",
+    "_meta": {
+      "title": " JLC Resize Multiple Images"
+    }
+  },
+  "902": {
+    "inputs": {
+      "columns": 3,
+      "cell_width": [
+        "894",
+        2
+      ],
+      "cell_height": [
+        "894",
+        3
+      ],
+      "padding": 32,
+      "images": [
+        "899",
+        5
+      ]
+    },
+    "class_type": "ImageGrid",
+    "_meta": {
+      "title": "Make Image Grid"
+    }
+  },
+  "903": {
+    "inputs": {
+      "images": [
+        "902",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "927": {
+    "inputs": {
+      "switch": true,
+      "save_when": "TRUE",
+      "filename_prefix": "ComfyUI",
+      "output_folder": "G:\\My Drive\\AI Stuff\\2026-08-31\\ControlNet-Dev",
+      "compress_level": 4,
+      "image_on_true": [
+        "867",
+        0
+      ],
+      "image_on_false": [
+        "867",
+        0
+      ]
+    },
+    "class_type": "JLCConditionalSaveImage",
+    "_meta": {
+      "title": " JLC Conditional Save Image"
+    }
+  },
+  "917:912": {
+    "inputs": {
+      "width": [
+        "894",
+        2
+      ],
+      "height": [
+        "894",
+        3
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "Empty Flux 2 Latent"
+    }
+  },
+  "917:915": {
+    "inputs": {
+      "noise": [
+        "887",
+        0
+      ],
+      "guider": [
+        "917:910",
+        0
+      ],
+      "sampler": [
+        "917:911",
+        0
+      ],
+      "sigmas": [
+        "917:914",
+        0
+      ],
+      "latent_image": [
+        "917:912",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "917:911": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "917:910": {
+    "inputs": {
+      "model": [
+        "884",
+        0
+      ],
+      "conditioning": [
+        "650",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "Basic Guider"
+    }
+  },
+  "917:914": {
+    "inputs": {
+      "steps": 8,
+      "width": [
+        "894",
+        2
+      ],
+      "height": [
+        "894",
+        3
+      ]
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  }
+}

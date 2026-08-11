@@ -15,6 +15,8 @@ htmlcov/
 .reference/
 .tools/
 .tests/
+flux2-conditioning-minilab/
+
 
 # Generated project reports
 jlc-flux2-controlnet-structure.txt

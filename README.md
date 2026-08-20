@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="Release" src="https://img.shields.io/badge/release-v1.0.1-blue.svg">
+  <img alt="Release" src="https://img.shields.io/badge/release-v1.1.0-blue.svg">
   <img alt="ComfyUI custom nodes" src="https://img.shields.io/badge/ComfyUI-custom%20nodes-2f80ed.svg">
   <img alt="FLUX2 ControlNet" src="https://img.shields.io/badge/FLUX2-ControlNet-6f42c1.svg">
   <img alt="Python 3.10+" src="https://img.shields.io/badge/Python-3.10%2B-3776ab.svg">
@@ -21,7 +21,7 @@
 
 ## Overview
 
-**JLC Flux2 ControlNet** integrates the compact FLUX.2-dev Fun ControlNet Union side model into ComfyUI while preserving ComfyUI's native FLUX.2 transformer, sampler, hooks, model loading, offloading, and cleanup paths.
+**JLC Flux2 ControlNet** integrates the compact FLUX.2-dev Fun ControlNet Union side model into ComfyUI while preserving ComfyUI's native FLUX.2 transformer, sampler, hooks, model loading, offloading, and cleanup paths. **Release 1.1.0 adds transparent support for both dense BF16 checkpoints and compatible mixed FP8/BF16 checkpoints through the same Loader and downstream node interfaces.**
 
 The project provides a conventional single-ControlNet Apply path and a preferred **flat, non-recursive Orchestrator** for combining up to four independently configured ControlNet branches through one shared loaded side model. It also adds multi-reference conditioning, reusable CPU latent caches, a unified cache-preparation workflow, and an experimental mask-aware in/out-paint path with optional precomputed inpaint context.
 
@@ -30,6 +30,7 @@ The project provides a conventional single-ControlNet Apply path and a preferred
 ## Highlights
 
 - **ComfyUI-native integration** with no global replacement of the FLUX.2 model or sampler
+- **Unified BF16 and FP8 ControlNet loading** — the same Loader automatically supports the original dense FLUX.2 Fun ControlNet checkpoints and the JLC mixed FP8/BF16 Union-2602 checkpoint, with no precision selector or separate FP8 node family
 - **Single-ControlNet Apply** and positive/negative Advanced Apply interfaces
 - **One-to-four-branch ControlNet Orchestrator** with independent images, strengths, and timestep ranges
 - **Flat non-recursive composition** with shared side-model weights
@@ -54,7 +55,16 @@ The project provides a conventional single-ControlNet Apply path and a preferred
 
 ## Included Workflows
 
-The repository includes Release 1.0.1 reference-image, multi-ControlNet, experimental In/Out-Paint Adapter, and cache-preparation workflows. The PNG files contain embedded ComfyUI workflow data and can be dragged directly into ComfyUI. JSON files are also provided for standard workflow loading.
+The repository includes a Release 1.1.0 mixed FP8/BF16 multi-ControlNet example together with the Release 1.0.1 reference-image, multi-ControlNet, experimental In/Out-Paint Adapter, and cache-preparation workflows. The PNG files contain embedded ComfyUI workflow data and can be dragged directly into ComfyUI. JSON files are also provided for standard workflow loading.
+
+### Release 1.1.0 — mixed FP8/BF16 multi-ControlNet example
+
+This workflow demonstrates the unified Loader using the JLC mixed FP8/BF16 `FLUX.2-dev-Fun-Controlnet-Union-2602` checkpoint. The FP8 checkpoint uses the same Apply, Orchestrator, reference-conditioning, and cache infrastructure as the dense checkpoint.
+
+[![JLC Flux2 FP8 multi-ControlNet workflow](assets/workflows/Release_1.1.0/jlc_flux2_fp8_multicontrol_workflow.png)](assets/workflows/Release_1.1.0/jlc_flux2_fp8_multicontrol_workflow.png)
+
+[Download the PNG workflow](assets/workflows/Release_1.1.0/jlc_flux2_fp8_multicontrol_workflow.png) ·
+[Download the JSON workflow](assets/workflows/Release_1.1.0/jlc_flux2_fp8_multicontrol_workflow.json)
 
 ### Basic reference-image and multi-ControlNet workflow
 
@@ -118,6 +128,8 @@ Place a compatible compact FLUX.2-dev Fun ControlNet Union checkpoint in:
 ```text
 ComfyUI/models/controlnet/
 ```
+
+The Loader automatically identifies compatible FLUX.2 Fun ControlNet checkpoints and handles supported dense and mixed-precision representations without requiring a separate node or precision setting.
 
 Then restart ComfyUI.
 
@@ -229,7 +241,7 @@ A dense auxiliary ControlNet may remain computationally fast while still introdu
 
 | Node | Status | Purpose |
 |---|---|---|
-| **JLC Flux2 ControlNet Loader** | Stable | Loads the compatible compact side model as a reusable JLC ControlNet object. |
+| **JLC Flux2 ControlNet Loader** | Stable | Loads compatible dense BF16 or mixed FP8/BF16 FLUX.2 Fun ControlNet checkpoints as the same reusable JLC ControlNet object. |
 | **JLC Flux2 ControlNet Apply** | Stable | Attaches one configured ControlNet branch to one conditioning stream. |
 | **JLC Flux2 ControlNet Apply Advanced** | Stable | Attaches one shared configuration to positive and negative conditioning. |
 | **JLC Flux2 ControlNet Orchestrator** | Stable | Builds a flat one-to-four-branch composition for one conditioning stream. |
@@ -247,7 +259,7 @@ A dense auxiliary ControlNet may remain computationally fast while still introdu
 
 ## Documentation
 
-The Release 1.0.1 documentation is organized from practical usage toward implementation detail. The source code and current ComfyUI node interfaces remain authoritative for exact behavior.
+The Release 1.1.0 documentation is organized from practical usage toward implementation detail. The source code and current ComfyUI node interfaces remain authoritative for exact behavior.
 
 - [Documentation home](docs/README.md)
 
@@ -312,7 +324,8 @@ JLC-Flux2-ControlNet/
 │   ├── icons/
 │   └── workflows/
 │       ├── Release_0.1.0/
-│       └── Release_1.0.1/
+│       ├── Release_1.0.1/
+│       └── Release_1.1.0/
 ├── docs/
 │   ├── developer/
 │   ├── getting-started/

@@ -1,7 +1,7 @@
 [project]
 name = "jlc-flux2-controlnet"
-version = "1.0.1"
-description = "A ComfyUI-native FLUX.2 ControlNet toolkit for the FLUX.2-dev Fun ControlNet Union checkpoint. It provides single-ControlNet Apply nodes, flat non-recursive one-to-four-branch orchestration with independent strength and timestep ranges, reference-image conditioning, hint and reference latent caching, and an experimental mask-aware in/out-paint adapter while preserving ComfyUI's native FLUX.2 sampler and model-management lifecycle."
+version = "1.1.0"
+description = "A ComfyUI-native FLUX.2 ControlNet toolkit for FLUX.2-dev Fun ControlNet Union checkpoints, with unified dense BF16 and mixed FP8/BF16 loading, single-ControlNet Apply nodes, flat non-recursive multi-ControlNet orchestration, reference-image conditioning, latent caching, and experimental mask-aware in/out-paint support while preserving ComfyUI\'s native FLUX.2 sampler and model-management lifecycle."
 authors = [
     { name = "J. L. Córdova", email = "jose.l.cordova@gmail.com" }
 ]
@@ -17,6 +17,10 @@ keywords = [
     "image-generation",
     "flux",
     "flux2",
+    "flux2-controlnet",
+    "fp8",
+    "float8",
+    "mixed-precision",
     "flux-workflows",
     "controlnet",
     "controlnet-apply",
@@ -44,6 +48,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/Damkohler/JLC-Flux2-ControlNet"
 Repository = "https://github.com/Damkohler/JLC-Flux2-ControlNet"
+Documentation = "https://github.com/Damkohler/JLC-Flux2-ControlNet/tree/main/docs"
 Issues = "https://github.com/Damkohler/JLC-Flux2-ControlNet/issues"
 
 [tool.comfy]

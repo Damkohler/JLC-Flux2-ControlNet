@@ -1,7 +1,7 @@
 # ControlNet Loader and Apply Nodes
 
 > [!NOTE]
-> **Documentation status: Draft for Release 1.0.0.**  
+> **Documentation status: Release 1.1.0.**  
 > This page follows the current release implementation and supplied workflows, but remains under editorial review. The source code and current ComfyUI node interfaces are authoritative for exact behavior.
 
 
@@ -27,7 +27,11 @@ The Loader resolves a checkpoint from `ComfyUI/models/controlnet/` and returns a
 
 Loader execution creates a small deferred checkpoint handle. The checkpoint is read and the compact side model is constructed when ComfyUI gathers sampling models. Shallow configured copies share the same handle and `CoreModelPatcher`.
 
+Release 1.1.0 uses one Loader for supported dense BF16 and mixed FP8/BF16 checkpoints. Checkpoint representation is detected automatically; downstream Apply and Orchestrator nodes receive the same `JLC_FLUX2_CONTROLNET` abstraction in either case.
+
 The loader validates the compact Union architecture, including the 260-channel input and contiguous control-block indices. It does not globally replace the FLUX.2 model.
+
+The model dropdown is filtered from safetensors header information so that only checkpoints matching the supported FLUX.2 Fun ControlNet architecture are exposed. For mixed-precision checkpoints, the backend validates the quantization metadata, FP8 weights, scale tensors, and ComfyUI-native quantized-module descriptors before materializing the model.
 
 ## JLC Flux2 ControlNet Apply
 

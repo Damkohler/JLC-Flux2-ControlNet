@@ -1,7 +1,7 @@
 [project]
 name = "jlc-flux2-controlnet"
 version = "1.1.0"
-description = "A ComfyUI-native FLUX.2 ControlNet toolkit for FLUX.2-dev Fun ControlNet Union checkpoints, with unified dense BF16 and mixed FP8/BF16 loading, single-ControlNet Apply nodes, flat non-recursive multi-ControlNet orchestration, reference-image conditioning, latent caching, and experimental mask-aware in/out-paint support while preserving ComfyUI\'s native FLUX.2 sampler and model-management lifecycle."
+description = "A ComfyUI-native FLUX.2 ControlNet toolkit for FLUX.2-dev Fun ControlNet Union checkpoints, with unified dense BF16 and mixed FP8/BF16 loading, single-ControlNet Apply nodes, flat non-recursive multi-ControlNet orchestration, reference-image conditioning, latent caching, and experimental mask-aware in/out-paint support while preserving ComfyUI's native FLUX.2 sampler and model-management lifecycle."
 authors = [
     { name = "J. L. Córdova", email = "jose.l.cordova@gmail.com" }
 ]

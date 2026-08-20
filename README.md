@@ -129,9 +129,20 @@ Place a compatible compact FLUX.2-dev Fun ControlNet Union checkpoint in:
 ComfyUI/models/controlnet/
 ```
 
+### Model checkpoints
+
+JLC Flux2 ControlNet supports the original dense BF16 FLUX.2 Fun ControlNet checkpoints and the JLC mixed FP8/BF16 Union-2602 derivative through the same Loader:
+
+- **Original BF16 FLUX.2 Fun ControlNet Union:** [Alibaba-PAI / FLUX.2-dev-Fun-Controlnet-Union](https://huggingface.co/alibaba-pai/FLUX.2-dev-Fun-Controlnet-Union)
+- **JLC mixed FP8/BF16 Union-2602:** [FLUX.2-dev-Fun-Controlnet-Union-2602-JLC-FP8](https://huggingface.co/Damkohler/FLUX.2-dev-Fun-Controlnet-Union-2602-JLC-FP8)
+
+Model weights are not included in this repository. Download the desired checkpoint from its model repository and follow the applicable model license and usage terms.
+
 The Loader automatically identifies compatible FLUX.2 Fun ControlNet checkpoints and handles supported dense and mixed-precision representations without requiring a separate node or precision setting.
 
 Then restart ComfyUI.
+
+---
 
 ### Requirements
 
